@@ -6,21 +6,41 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://fupinglee.github.io">
-  <title>Hello World | 浮萍的个人空间</title>
+  <title>Android HOOK 技术之Frida的初级使用 | 浮萍的个人空间</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+  <meta name="description" content="Frida是一款基于Python + JavaScript 的Hook与调试框架，在Android\Linux\Windows等平台均能使用。这里我们以Windows来对Android应用程序进行Hook。Frida的官网地址是：https://www.frida.re。
+Windows下Frida的安装
+有多种安装方法，这里提供两种，第一种直接使用pip安装，第二种是下载egg文件安装
+
+1.通">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="https://fupinglee.github.io/2017/03/20/hello-world/index.html">
+<meta property="og:title" content="Android HOOK 技术之Frida的初级使用">
+<meta property="og:url" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/index.html">
 <meta property="og:site_name" content="浮萍的个人空间">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
-<meta property="og:updated_time" content="2017-03-20T12:18:23.925Z">
+<meta property="og:description" content="Frida是一款基于Python + JavaScript 的Hook与调试框架，在Android\Linux\Windows等平台均能使用。这里我们以Windows来对Android应用程序进行Hook。Frida的官网地址是：https://www.frida.re。
+Windows下Frida的安装
+有多种安装方法，这里提供两种，第一种直接使用pip安装，第二种是下载egg文件安装
+
+1.通">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/frida-ps.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器配置.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/adb push.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server结果.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/手机进程.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行结果.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/对change进行hook.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器上对change方法进行hook.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/对test和change的hook.png">
+<meta property="og:updated_time" content="2017-04-08T18:29:00.711Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
-Quick">
+<meta name="twitter:title" content="Android HOOK 技术之Frida的初级使用">
+<meta name="twitter:description" content="Frida是一款基于Python + JavaScript 的Hook与调试框架，在Android\Linux\Windows等平台均能使用。这里我们以Windows来对Android应用程序进行Hook。Frida的官网地址是：https://www.frida.re。
+Windows下Frida的安装
+有多种安装方法，这里提供两种，第一种直接使用pip安装，第二种是下载egg文件安装
+
+1.通">
+<meta name="twitter:image" content="https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/frida-ps.png">
   
     <link rel="alternative" href="/atom.xml" title="浮萍的个人空间" type="application/atom+xml">
   
@@ -150,35 +170,69 @@ Quick">
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-hello-world" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Android-HOOK-技术之Frida的初级使用" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      Android HOOK 技术之Frida的初级使用
     </h1>
   
 
         
-        <a href="/2017/03/20/hello-world/" class="archive-article-date">
-  	<time datetime="2017-03-20T12:18:23.925Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-03-20</time>
+        <a href="/2017/04/01/Android-HOOK-技术之Frida的初级使用/" class="archive-article-date">
+  	<time datetime="2017-04-01T11:39:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-01</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+        <p><strong>Frida</strong>是一款基于Python + JavaScript 的Hook与调试框架，在Android\Linux\Windows等平台均能使用。这里我们以<strong>Windows</strong>来对Android应用程序进行Hook。Frida的官网地址是：<a href="https://www.frida.re。" target="_blank" rel="external">https://www.frida.re。</a></p>
+<h2 id="Windows下Frida的安装"><a href="#Windows下Frida的安装" class="headerlink" title="Windows下Frida的安装"></a>Windows下Frida的安装</h2><blockquote>
+<p>有多种安装方法，这里提供两种，第一种直接使用pip安装，第二种是下载egg文件安装</p>
+</blockquote>
+<h3 id="1-通过pip安装Frida"><a href="#1-通过pip安装Frida" class="headerlink" title="1.通过pip安装Frida"></a>1.通过pip安装Frida</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install frida</div></pre></td></tr></table></figure>
+<h3 id="2-去下载对应平台的egg安装包进行安装"><a href="#2-去下载对应平台的egg安装包进行安装" class="headerlink" title="2.去下载对应平台的egg安装包进行安装"></a>2.去下载对应平台的egg安装包进行安装</h3><p>下载地址：<a href="https://pypi.python.org/pypi/frida" target="_blank" rel="external">https://pypi.python.org/pypi/frida</a><br>当前最新版本为<strong>9.1.23</strong>，下载对应平台和Python版本的安装包，例如我的系统为Win64，Python为2.7，下载的文件为<strong>frida-9.1.23-py2.7-win-amd64.egg</strong>。下载后安装即可。</p>
+<blockquote>
+<p>由于网络原因，方法1安装时间太久，这里推荐第二种方法。</p>
+</blockquote>
+<p>安装完成后在Dos窗口输入命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">frida-ps</div></pre></td></tr></table></figure></p>
+<p>出现类似以下的界面表示安装成功。</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/frida-ps.png" alt="frida-ps"></p>
+<h2 id="Android下Frida环境的搭建"><a href="#Android下Frida环境的搭建" class="headerlink" title="Android下Frida环境的搭建"></a>Android下Frida环境的搭建</h2><blockquote>
+<p>要求：一部Root过的手机或模拟器，最好采用4.4 ARM系统。PS：我真机采用的是魅族4的5.1系统，有些功能实现不了，只好用模拟器来完成。模拟器的具体配置如下图所示。</p>
+</blockquote>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器配置.png" alt="模拟器配置"></p>
+<p>首先需用下载最新的frida-server，下载地址为：<a href="http://build.frida.re/frida-snapshot/android/arm/bin/frida-server。" target="_blank" rel="external">http://build.frida.re/frida-snapshot/android/arm/bin/frida-server。</a><br>下载后将文件上传到手机中，并赋予执行权限。上传到手机使用如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">adb push frida-server /data/local/tmp/</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/adb push.png" alt="adb push"></p>
+<p>将frida-server赋予执行权限，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">adb shell</div><div class="line">su</div><div class="line">cd /data/local/tmp/</div><div class="line">chmod 777 frida-server</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server.png" alt="运行Frida-Server"></p>
+<p>运行Frida-Server<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./data/local/tmp/frida-server</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server结果.png" alt="运行Frida-Server结果"></p>
+<p>执行frida-ps -U可以看到手机上的进程</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/手机进程.png" alt="手机进程"></p>
+<blockquote>
+<p>使用frida-ps -R 也可以，但是需要进行转发。执行<code>adb forward tcp:27042 tcp:27042</code>后执行<code>frida-ps -R</code>也可以看到手机上的进程</p>
+</blockquote>
+<p>至此，准备工作已经做好，现在来进行对Android上的程序进行Hook了。<br>首先以WX的掷骰子和猜拳头为例。这里采用最新版的WX（<strong>6.5.7</strong>）。<br>其代码如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: utf-8 -*</span></div><div class="line"><span class="keyword">import</span> frida, sys</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(message, data)</span>:</span></div><div class="line">    <span class="keyword">if</span> message[<span class="string">'type'</span>] == <span class="string">'send'</span>:</div><div class="line">        print(<span class="string">"[*] &#123;0&#125;"</span>.format(message[<span class="string">'payload'</span>]))</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        print(message)</div><div class="line"></div><div class="line">jscode = <span class="string">"""</span></div><div class="line">Java.perform(function () &#123;</div><div class="line">var be= Java.use("com.tencent.mm.sdk.platformtools.bf");</div><div class="line">send("start")</div><div class="line">be.da.implementation = function()&#123;</div><div class="line"></div><div class="line">    var type = arguments[0];</div><div class="line">    send(type);//5表示掷骰子，2表示猜拳头</div><div class="line">    if(type ==2)&#123;</div><div class="line">    return 1;//表示是石头</div><div class="line">    &#125;else&#123;</div><div class="line">        return 5;//骰子6点</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line">send("end")</div><div class="line">&#125;);</div><div class="line">"""</div><div class="line"></div><div class="line">process = frida.get_usb_device().attach(<span class="string">'com.tencent.mm'</span>)</div><div class="line">script = process.create_script(jscode)</div><div class="line">script.on(<span class="string">'message'</span>, on_message)</div><div class="line">print(<span class="string">'[*] weixin Start...'</span>)</div><div class="line">script.load()</div><div class="line">sys.stdin.read()</div></pre></td></tr></table></figure></p>
+<p>手机上打开微信后，运行代码。<br>然后点击掷骰子，可以看到都是6点，猜拳头全部是石头。<br><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行结果.png" alt="运行结果"></p>
+<p>下面来用一个例子来介绍一下，如何来通过Hook的方法修改原来的内容，以及当出现相同方法名时，如何对该方法进行Hook。<br>其Android的Activity代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.test.fridatest;</div><div class="line"></div><div class="line"><span class="keyword">import</span> android.app.Activity;</div><div class="line"><span class="keyword">import</span> android.os.Bundle;</div><div class="line"><span class="keyword">import</span> android.util.Log;</div><div class="line"><span class="keyword">import</span> android.view.View;</div><div class="line"><span class="keyword">import</span> android.view.View.OnClickListener;</div><div class="line"><span class="keyword">import</span> android.widget.Button;</div><div class="line"><span class="keyword">import</span> android.widget.Toast;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"></div><div class="line">		<span class="keyword">private</span> Button myButton1;</div><div class="line">		<span class="keyword">private</span> String TAG = <span class="string">"fuping"</span>;</div><div class="line"></div><div class="line">	    <span class="meta">@Override</span></div><div class="line">	    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">	        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">	        setContentView(R.layout.activity_main);</div><div class="line"></div><div class="line">	        myButton1 = (Button) findViewById(R.id.button1);</div><div class="line">	        myButton1.setOnClickListener( <span class="keyword">new</span> ButtonClick());</div><div class="line">	    &#125;</div><div class="line"></div><div class="line">	    <span class="class"><span class="keyword">class</span> <span class="title">ButtonClick</span> <span class="keyword">implements</span> <span class="title">OnClickListener</span> </span>&#123;</div><div class="line">	        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</div><div class="line">	            <span class="keyword">switch</span> (v.getId()) &#123;</div><div class="line">	            <span class="keyword">case</span> R.id.button1:</div><div class="line">	                <span class="keyword">int</span> nRet = test(<span class="number">4</span>);</div><div class="line">	                String strRet = nRet + <span class="string">""</span>;</div><div class="line">	                Toast.makeText(MainActivity.<span class="keyword">this</span>, strRet,Toast.LENGTH_LONG).show();</div><div class="line">	                Log.i(TAG, <span class="string">"test(int):"</span>+ strRet);</div><div class="line">	                strRet = test(<span class="number">4</span>,<span class="number">2</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"test(int,int):"</span>+ strRet);</div><div class="line">	                strRet = test(<span class="number">4</span>,<span class="string">"2"</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"test(int,String):"</span>+ strRet);</div><div class="line">	                strRet = change(<span class="number">4</span>,<span class="string">"2"</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"change(int,String):"</span>+ strRet);</div><div class="line">	                <span class="keyword">break</span>;</div><div class="line">	            <span class="keyword">default</span>:</div><div class="line">	                <span class="keyword">break</span>;</div><div class="line">	            &#125;</div><div class="line">	        &#125;</div><div class="line"></div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> num)</span></span></div><div class="line">	    &#123;</div><div class="line">	        <span class="keyword">int</span> nRet = num*<span class="number">2</span>;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> num,<span class="keyword">int</span> b)</span></span></div><div class="line">	    &#123;</div><div class="line">	        <span class="keyword">int</span> nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">(<span class="keyword">int</span> num,String b)</span></span></div><div class="line">	    &#123;</div><div class="line">	    	String nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> String <span class="title">change</span><span class="params">(<span class="keyword">int</span> num,String b)</span></span></div><div class="line">	    &#123;</div><div class="line">	    	String nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
+<p>首先演示一下对change方法的hook。<br>hook之前change方法输出的结果为82，预期Hook之后输出的结果应该为164。<br>在真机上运行结果如下所示：</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/对change进行hook.png" alt="对change进行hook"></p>
+<p>发现Hook之后返回的是null，而且报错。（经过多次给手机系统升级或降级，都无法成功，最后之后在模拟器上测试了）</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器上对change方法进行hook.png" alt="模拟器上对change方法进行hook"></p>
+<p>在模拟器上进行Hook后，出现了预期的结果。<br>在对test方法进行hook时，由于有多个test方法，所以在进行Hook时，需要指定是哪个方法。<br>例如对<code>String test(int num,String b)</code>进行hook时，可以使用如下代码<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> TM = Java.use(<span class="string">"com.test.fridatest.MainActivity"</span>);</div><div class="line">TM.test.overload(<span class="string">"int"</span>,<span class="string">"java.lang.String"</span>).implementation = <span class="function"><span class="keyword">function</span> (<span class="params">a,b</span>) </span>&#123;</div><div class="line">    send(<span class="string">"Called - test(int,String):"</span>+a+<span class="string">"----"</span>+b);</div><div class="line">   <span class="keyword">return</span> <span class="keyword">this</span>.test.overload(<span class="string">"int"</span>,<span class="string">"java.lang.String"</span>).call(<span class="keyword">this</span>,<span class="number">8</span>,<span class="string">"3"</span>);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>附上对test和change同时hook 的结果：</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/对test和change的hook.png" alt="对test和change的hook"></p>
+<p>就个人而言，针对Frida和Xposed相比，Frida操作更简单，而且不需要重启手机。但相关资料较少，还是需要慢慢学习。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ol>
+<li><a href="https://www.frida.re/docs/examples/android/" target="_blank" rel="external">https://www.frida.re/docs/examples/android/</a></li>
+<li><a href="https://www.codemetrix.net/hacking-android-apps-with-frida-1/" target="_blank" rel="external">https://www.codemetrix.net/hacking-android-apps-with-frida-1/</a></li>
+<li><a href="http://www.cnblogs.com/konf/p/5998785.html" target="_blank" rel="external">http://www.cnblogs.com/konf/p/5998785.html</a></li>
+</ol>
 
       
 
@@ -258,7 +312,7 @@ Quick">
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=https://fupinglee.github.io/2017/03/20/hello-world/" alt="微信分享二维码">
+      <img src="http://s.jiathis.com/qrcode.php?url=https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -272,15 +326,11 @@ Quick">
   
 <nav id="article-nav">
   
-    <a href="/2017/04/01/Android-HOOK-技术之Frida的初级使用/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          Android HOOK 技术之Frida的初级使用
-        
-      </div>
-    </a>
   
+    <a href="/2017/03/20/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Hello World</div>
+      <i class="icon-circle-right"></i>
+    </a>
   
 </nav>
 
