@@ -4,9 +4,9 @@
   <subtitle>just do it</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="https://fupinglee.github.io/"/>
+  <link href="http://fuping.site/"/>
   <updated>2017-07-12T05:21:58.176Z</updated>
-  <id>https://fupinglee.github.io/</id>
+  <id>http://fuping.site/</id>
   
   <author>
     <name>浮萍</name>
@@ -17,8 +17,8 @@
   
   <entry>
     <title>Piwik代码执行漏洞安全分析（附验证过程Getshell）</title>
-    <link href="https://fupinglee.github.io/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/"/>
-    <id>https://fupinglee.github.io/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/</id>
+    <link href="http://fuping.site/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/"/>
+    <id>http://fuping.site/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/</id>
     <published>2017-07-12T09:50:14.000Z</published>
     <updated>2017-07-12T05:21:58.176Z</updated>
     
@@ -139,21 +139,21 @@
     
     </summary>
     
-      <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
     
     
-      <category term="Metasploit" scheme="https://fupinglee.github.io/tags/Metasploit/"/>
+      <category term="piwik" scheme="http://fuping.site/tags/piwik/"/>
     
-      <category term="piwik" scheme="https://fupinglee.github.io/tags/piwik/"/>
+      <category term="漏洞分析" scheme="http://fuping.site/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
     
-      <category term="漏洞分析" scheme="https://fupinglee.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
+      <category term="Metasploit" scheme="http://fuping.site/tags/Metasploit/"/>
     
   </entry>
   
   <entry>
     <title>Weblogic 常见漏洞环境的搭建及其利用</title>
-    <link href="https://fupinglee.github.io/2017/06/05/Weblogic-Vulnerability-Verification/"/>
-    <id>https://fupinglee.github.io/2017/06/05/Weblogic-Vulnerability-Verification/</id>
+    <link href="http://fuping.site/2017/06/05/Weblogic-Vulnerability-Verification/"/>
+    <id>http://fuping.site/2017/06/05/Weblogic-Vulnerability-Verification/</id>
     <published>2017-06-05T01:19:34.000Z</published>
     <updated>2017-06-09T03:16:54.420Z</updated>
     
@@ -221,21 +221,21 @@
     
     </summary>
     
-      <category term="渗透测试" scheme="https://fupinglee.github.io/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
+      <category term="渗透测试" scheme="http://fuping.site/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
     
     
-      <category term="WebLogic漏洞" scheme="https://fupinglee.github.io/tags/WebLogic%E6%BC%8F%E6%B4%9E/"/>
+      <category term="WebLogic漏洞" scheme="http://fuping.site/tags/WebLogic%E6%BC%8F%E6%B4%9E/"/>
     
-      <category term="SSRF" scheme="https://fupinglee.github.io/tags/SSRF/"/>
+      <category term="SSRF" scheme="http://fuping.site/tags/SSRF/"/>
     
-      <category term="WebLogic反序列化" scheme="https://fupinglee.github.io/tags/WebLogic%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+      <category term="WebLogic反序列化" scheme="http://fuping.site/tags/WebLogic%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
   </entry>
   
   <entry>
     <title>Samba远程代码执行漏洞(CVE-2017-7494)复现过程</title>
-    <link href="https://fupinglee.github.io/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/"/>
-    <id>https://fupinglee.github.io/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/</id>
+    <link href="http://fuping.site/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/"/>
+    <id>http://fuping.site/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/</id>
     <published>2017-05-25T10:43:14.000Z</published>
     <updated>2017-06-09T07:12:21.909Z</updated>
     
@@ -285,19 +285,19 @@
     
     </summary>
     
-      <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
     
     
-      <category term="CVE-2017-7494" scheme="https://fupinglee.github.io/tags/CVE-2017-7494/"/>
+      <category term="CVE-2017-7494" scheme="http://fuping.site/tags/CVE-2017-7494/"/>
     
-      <category term="Samba漏洞" scheme="https://fupinglee.github.io/tags/Samba%E6%BC%8F%E6%B4%9E/"/>
+      <category term="Samba漏洞" scheme="http://fuping.site/tags/Samba%E6%BC%8F%E6%B4%9E/"/>
     
   </entry>
   
   <entry>
     <title>如何清除百度网盘重复文件</title>
-    <link href="https://fupinglee.github.io/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/"/>
-    <id>https://fupinglee.github.io/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/</id>
+    <link href="http://fuping.site/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/"/>
+    <id>http://fuping.site/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/</id>
     <published>2017-05-24T07:24:27.000Z</published>
     <updated>2017-06-09T07:08:29.239Z</updated>
     
@@ -413,7 +413,7 @@
 <p>删除文件的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 根据文件列表删除文件</div><div class="line"> * <span class="doctag">@param</span> filelist</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">delRequest</span><span class="params">(String filelist)</span></span>&#123;</div><div class="line">	String url = <span class="string">"https://pan.baidu.com/api/filemanager?opera=delete&amp;async=2&amp;channel=chunlei&amp;web=1&amp;app_id=250528&amp;bdstoken="</span>+getbdstoken()+<span class="string">"&amp;logid=MTQ5NTU0ODk4Mjk2MjAuMzgyNjczNDYzNDM0MTU0NA==&amp;clienttype=0"</span>;</div><div class="line">	String result = <span class="string">"删除失败,请重试"</span>;</div><div class="line">	String jsonStr = getbody(url, getCookies(),filelist);</div><div class="line">	JSONObject jsonObj = JSONObject.parseObject(jsonStr);</div><div class="line">	<span class="keyword">if</span>(jsonObj.get(<span class="string">"errno"</span>).toString().equals(<span class="string">"0"</span>))&#123;</div><div class="line">		result = <span class="string">"文件删除成功，删除成功的文件为"</span>+filelist;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>测试删除的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Test</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testdelFile</span><span class="params">()</span></span>&#123;</div><div class="line"></div><div class="line">	String fileList = UtilMethod.getFileList();</div><div class="line">	System.out.println(UtilMethod.delRequest(fileList));</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>附上效果图<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/Java代码删除文件.gif" alt="Java代码删除文件"></p>
-<p>大功告成。不过删除的时候要注意一下，删除错误的话可以去回收站查看，然后再恢复。不要急于清除回收站。<br>代码仅供参考。代码地址：<a href="http://fuping.site/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/BaiDuPan.rar" target="_blank" rel="external">代码</a><br>Python的实现脚本<a href="https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py" target="_blank" rel="external">https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py</a> 。<br>python代码删除文件效果图<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/python代码删除文件.gif" alt="python代码删除文件"></p>
+<p>大功告成。不过删除的时候要注意一下，删除错误的话可以去回收站查看，然后再恢复。不要急于清除回收站。<br>代码仅供参考。代码地址：<a href="http://fuping.site/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/BaiDuPan.rar">代码</a><br>Python的实现脚本<a href="https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py" target="_blank" rel="external">https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py</a> 。<br>python代码删除文件效果图<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/python代码删除文件.gif" alt="python代码删除文件"></p>
 <p>还有一种最快的实现方法就是开个会员o(╯□╰)o。</p>
 <h3 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h3><p>本文没有什么大的知识点，都是常用的内容拼接在了一起。主要用到了三方面的内容：<br>1.如何模拟网络请求抓取数据。这里采用了Java代码，Http请求采用了Jsoup。<br>2.JSON解析，使用了FastJSON来实现<br>3.递归遍历的实现</p>
 <p>Python的实现也就是请求Http和数据库的操作。使用Python时要多注意数据类型和编码的转换。</p>
@@ -425,23 +425,23 @@
     
     </summary>
     
-      <category term="编程开发" scheme="https://fupinglee.github.io/categories/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/"/>
+      <category term="编程开发" scheme="http://fuping.site/categories/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/"/>
     
     
-      <category term="百度网盘" scheme="https://fupinglee.github.io/tags/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/"/>
+      <category term="百度网盘" scheme="http://fuping.site/tags/%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98/"/>
     
-      <category term="快速清除" scheme="https://fupinglee.github.io/tags/%E5%BF%AB%E9%80%9F%E6%B8%85%E9%99%A4/"/>
+      <category term="快速清除" scheme="http://fuping.site/tags/%E5%BF%AB%E9%80%9F%E6%B8%85%E9%99%A4/"/>
     
-      <category term="Java代码" scheme="https://fupinglee.github.io/tags/Java%E4%BB%A3%E7%A0%81/"/>
+      <category term="Java代码" scheme="http://fuping.site/tags/Java%E4%BB%A3%E7%A0%81/"/>
     
-      <category term="Python脚本" scheme="https://fupinglee.github.io/tags/Python%E8%84%9A%E6%9C%AC/"/>
+      <category term="Python脚本" scheme="http://fuping.site/tags/Python%E8%84%9A%E6%9C%AC/"/>
     
   </entry>
   
   <entry>
     <title>MSSQL DBA权限获取WEBSHELL的过程</title>
-    <link href="https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/"/>
-    <id>https://fupinglee.github.io/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/</id>
+    <link href="http://fuping.site/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/"/>
+    <id>http://fuping.site/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/</id>
     <published>2017-05-16T05:27:26.000Z</published>
     <updated>2017-06-09T07:09:12.667Z</updated>
     
@@ -501,21 +501,21 @@
     
     </summary>
     
-      <category term="渗透测试" scheme="https://fupinglee.github.io/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
+      <category term="渗透测试" scheme="http://fuping.site/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
     
     
-      <category term="MSSQL" scheme="https://fupinglee.github.io/tags/MSSQL/"/>
+      <category term="MSSQL" scheme="http://fuping.site/tags/MSSQL/"/>
     
-      <category term="WEBSHELL" scheme="https://fupinglee.github.io/tags/WEBSHELL/"/>
+      <category term="WEBSHELL" scheme="http://fuping.site/tags/WEBSHELL/"/>
     
-      <category term="ASPX" scheme="https://fupinglee.github.io/tags/ASPX/"/>
+      <category term="ASPX" scheme="http://fuping.site/tags/ASPX/"/>
     
   </entry>
   
   <entry>
     <title>MS17-010漏洞检测与内网穿透技术的应用</title>
-    <link href="https://fupinglee.github.io/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/"/>
-    <id>https://fupinglee.github.io/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/</id>
+    <link href="http://fuping.site/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/"/>
+    <id>http://fuping.site/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/</id>
     <published>2017-04-21T09:20:02.000Z</published>
     <updated>2017-06-09T07:11:59.295Z</updated>
     
@@ -580,21 +580,21 @@
     
     </summary>
     
-      <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
     
     
-      <category term="MS17-010" scheme="https://fupinglee.github.io/tags/MS17-010/"/>
+      <category term="Metasploit" scheme="http://fuping.site/tags/Metasploit/"/>
     
-      <category term="Ngrok" scheme="https://fupinglee.github.io/tags/Ngrok/"/>
+      <category term="MS17-010" scheme="http://fuping.site/tags/MS17-010/"/>
     
-      <category term="Metasploit" scheme="https://fupinglee.github.io/tags/Metasploit/"/>
+      <category term="Ngrok" scheme="http://fuping.site/tags/Ngrok/"/>
     
   </entry>
   
   <entry>
     <title>CVE-2017-0199漏洞复现过程</title>
-    <link href="https://fupinglee.github.io/2017/04/18/CVE-2017-0199%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/"/>
-    <id>https://fupinglee.github.io/2017/04/18/CVE-2017-0199漏洞复现过程/</id>
+    <link href="http://fuping.site/2017/04/18/CVE-2017-0199%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/"/>
+    <id>http://fuping.site/2017/04/18/CVE-2017-0199漏洞复现过程/</id>
     <published>2017-04-18T02:43:57.000Z</published>
     <updated>2017-06-09T07:11:34.833Z</updated>
     
@@ -651,21 +651,21 @@
     
     </summary>
     
-      <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
     
     
-      <category term="CVE-2017-0199" scheme="https://fupinglee.github.io/tags/CVE-2017-0199/"/>
+      <category term="CVE-2017-0199" scheme="http://fuping.site/tags/CVE-2017-0199/"/>
     
-      <category term="office漏洞" scheme="https://fupinglee.github.io/tags/office%E6%BC%8F%E6%B4%9E/"/>
+      <category term="office漏洞" scheme="http://fuping.site/tags/office%E6%BC%8F%E6%B4%9E/"/>
     
-      <category term="Msf" scheme="https://fupinglee.github.io/tags/Msf/"/>
+      <category term="Msf" scheme="http://fuping.site/tags/Msf/"/>
     
   </entry>
   
   <entry>
     <title>方程式漏洞利用之SMB</title>
-    <link href="https://fupinglee.github.io/2017/04/15/%E6%96%B9%E7%A8%8B%E5%BC%8F%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B9%8BSMB/"/>
-    <id>https://fupinglee.github.io/2017/04/15/方程式漏洞利用之SMB/</id>
+    <link href="http://fuping.site/2017/04/15/%E6%96%B9%E7%A8%8B%E5%BC%8F%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B9%8BSMB/"/>
+    <id>http://fuping.site/2017/04/15/方程式漏洞利用之SMB/</id>
     <published>2017-04-15T13:01:45.000Z</published>
     <updated>2017-06-09T07:12:46.191Z</updated>
     
@@ -749,19 +749,19 @@
     
     </summary>
     
-      <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
     
     
-      <category term="方程式" scheme="https://fupinglee.github.io/tags/%E6%96%B9%E7%A8%8B%E5%BC%8F/"/>
+      <category term="方程式" scheme="http://fuping.site/tags/%E6%96%B9%E7%A8%8B%E5%BC%8F/"/>
     
-      <category term="SMB漏洞" scheme="https://fupinglee.github.io/tags/SMB%E6%BC%8F%E6%B4%9E/"/>
+      <category term="SMB漏洞" scheme="http://fuping.site/tags/SMB%E6%BC%8F%E6%B4%9E/"/>
     
   </entry>
   
   <entry>
     <title>QQ登录简单分析，附易语言登录代码</title>
-    <link href="https://fupinglee.github.io/2017/04/10/QQ%E7%99%BB%E5%BD%95%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90%EF%BC%8C%E9%99%84%E6%98%93%E8%AF%AD%E8%A8%80%E7%99%BB%E5%BD%95%E4%BB%A3%E7%A0%81/"/>
-    <id>https://fupinglee.github.io/2017/04/10/QQ登录简单分析，附易语言登录代码/</id>
+    <link href="http://fuping.site/2017/04/10/QQ%E7%99%BB%E5%BD%95%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90%EF%BC%8C%E9%99%84%E6%98%93%E8%AF%AD%E8%A8%80%E7%99%BB%E5%BD%95%E4%BB%A3%E7%A0%81/"/>
+    <id>http://fuping.site/2017/04/10/QQ登录简单分析，附易语言登录代码/</id>
     <published>2017-04-10T13:58:29.000Z</published>
     <updated>2017-06-09T07:08:52.942Z</updated>
     
@@ -845,7 +845,7 @@
 <blockquote>
 <p>带验证码登录可能存在问题，待修改</p>
 </blockquote>
-<p><a href="http://fuping.site/2017/04/10/QQ登录简单分析，附易语言登录代码/QQLogin.e" target="_blank" rel="external">易语言实现代码</a></p>
+<p><a href="http://fuping.site/2017/04/10/QQ登录简单分析，附易语言登录代码/QQLogin.e">易语言实现代码</a></p>
 ]]></content>
     
     <summary type="html">
@@ -854,19 +854,19 @@
     
     </summary>
     
-      <category term="编程开发" scheme="https://fupinglee.github.io/categories/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/"/>
+      <category term="编程开发" scheme="http://fuping.site/categories/%E7%BC%96%E7%A8%8B%E5%BC%80%E5%8F%91/"/>
     
     
-      <category term="QQ登录" scheme="https://fupinglee.github.io/tags/QQ%E7%99%BB%E5%BD%95/"/>
+      <category term="QQ登录" scheme="http://fuping.site/tags/QQ%E7%99%BB%E5%BD%95/"/>
     
-      <category term="易语言" scheme="https://fupinglee.github.io/tags/%E6%98%93%E8%AF%AD%E8%A8%80/"/>
+      <category term="易语言" scheme="http://fuping.site/tags/%E6%98%93%E8%AF%AD%E8%A8%80/"/>
     
   </entry>
   
   <entry>
     <title>微信聊天记录读取</title>
-    <link href="https://fupinglee.github.io/2017/04/09/%E5%BE%AE%E4%BF%A1%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E8%AF%BB%E5%8F%96/"/>
-    <id>https://fupinglee.github.io/2017/04/09/微信聊天记录读取/</id>
+    <link href="http://fuping.site/2017/04/09/%E5%BE%AE%E4%BF%A1%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E8%AF%BB%E5%8F%96/"/>
+    <id>http://fuping.site/2017/04/09/微信聊天记录读取/</id>
     <published>2017-04-09T15:21:28.000Z</published>
     <updated>2017-06-09T07:07:44.232Z</updated>
     
@@ -891,17 +891,17 @@
     
     </summary>
     
-      <category term="Android技术" scheme="https://fupinglee.github.io/categories/Android%E6%8A%80%E6%9C%AF/"/>
+      <category term="Android技术" scheme="http://fuping.site/categories/Android%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="微信聊天记录" scheme="https://fupinglee.github.io/tags/%E5%BE%AE%E4%BF%A1%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95/"/>
+      <category term="微信聊天记录" scheme="http://fuping.site/tags/%E5%BE%AE%E4%BF%A1%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95/"/>
     
   </entry>
   
   <entry>
     <title>Android HOOK 技术之Frida的初级使用</title>
-    <link href="https://fupinglee.github.io/2017/04/01/Android-HOOK-%E6%8A%80%E6%9C%AF%E4%B9%8BFrida%E7%9A%84%E5%88%9D%E7%BA%A7%E4%BD%BF%E7%94%A8/"/>
-    <id>https://fupinglee.github.io/2017/04/01/Android-HOOK-技术之Frida的初级使用/</id>
+    <link href="http://fuping.site/2017/04/01/Android-HOOK-%E6%8A%80%E6%9C%AF%E4%B9%8BFrida%E7%9A%84%E5%88%9D%E7%BA%A7%E4%BD%BF%E7%94%A8/"/>
+    <id>http://fuping.site/2017/04/01/Android-HOOK-技术之Frida的初级使用/</id>
     <published>2017-04-01T11:39:15.000Z</published>
     <updated>2017-06-09T07:07:21.448Z</updated>
     
@@ -957,21 +957,21 @@
     
     </summary>
     
-      <category term="Android技术" scheme="https://fupinglee.github.io/categories/Android%E6%8A%80%E6%9C%AF/"/>
+      <category term="Android技术" scheme="http://fuping.site/categories/Android%E6%8A%80%E6%9C%AF/"/>
     
     
-      <category term="安卓Hook" scheme="https://fupinglee.github.io/tags/%E5%AE%89%E5%8D%93Hook/"/>
+      <category term="安卓Hook" scheme="http://fuping.site/tags/%E5%AE%89%E5%8D%93Hook/"/>
     
-      <category term="Frida" scheme="https://fupinglee.github.io/tags/Frida/"/>
+      <category term="Frida" scheme="http://fuping.site/tags/Frida/"/>
     
-      <category term="摇骰子" scheme="https://fupinglee.github.io/tags/%E6%91%87%E9%AA%B0%E5%AD%90/"/>
+      <category term="摇骰子" scheme="http://fuping.site/tags/%E6%91%87%E9%AA%B0%E5%AD%90/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="https://fupinglee.github.io/2017/03/20/hello-world/"/>
-    <id>https://fupinglee.github.io/2017/03/20/hello-world/</id>
+    <link href="http://fuping.site/2017/03/20/hello-world/"/>
+    <id>http://fuping.site/2017/03/20/hello-world/</id>
     <published>2017-03-20T12:18:23.925Z</published>
     <updated>2017-06-09T07:13:30.628Z</updated>
     
@@ -1008,9 +1008,9 @@
     </summary>
     
     
-      <category term="教程" scheme="https://fupinglee.github.io/tags/%E6%95%99%E7%A8%8B/"/>
+      <category term="教程" scheme="http://fuping.site/tags/%E6%95%99%E7%A8%8B/"/>
     
-      <category term="主题" scheme="https://fupinglee.github.io/tags/%E4%B8%BB%E9%A2%98/"/>
+      <category term="主题" scheme="http://fuping.site/tags/%E4%B8%BB%E9%A2%98/"/>
     
   </entry>
   
