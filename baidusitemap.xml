@@ -4,6 +4,31 @@
 
     
   <url>
+    <loc>http://fuping.site/2017/07/19/SQLite-Injection-Get-WebShell/</loc>
+    <lastmod>2017-07-26T02:00:30.932Z</lastmod>
+    <data>
+        <display>
+        <title>SQLite手工注入Getshell技巧</title>
+        <pubTime>2017-07-19T11:07:30.000Z</pubTime>
+        
+        <tag>WEBSHELL</tag>
+         
+        <tag>SQLite</tag>
+         
+         
+           
+             
+              <breadCrumb title="渗透测试" url="http://fuping.site/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+    
+    
+    
+  <url>
     <loc>http://fuping.site/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/</loc>
     <lastmod>2017-07-12T05:21:58.176Z</lastmod>
     <data>
@@ -11,11 +36,11 @@
         <title>Piwik代码执行漏洞安全分析（附验证过程Getshell）</title>
         <pubTime>2017-07-12T09:50:14.000Z</pubTime>
         
+        <tag>Metasploit</tag>
+         
         <tag>piwik</tag>
          
         <tag>漏洞分析</tag>
-         
-        <tag>Metasploit</tag>
          
          
            
@@ -98,11 +123,11 @@
         <title>MS17-010漏洞检测与内网穿透技术的应用</title>
         <pubTime>2017-04-21T09:20:02.000Z</pubTime>
         
-        <tag>Metasploit</tag>
-         
         <tag>MS17-010</tag>
          
         <tag>Ngrok</tag>
+         
+        <tag>Metasploit</tag>
          
          
            
@@ -277,5 +302,4 @@
     </data>
     </url>
 
-    
 </urlset>
