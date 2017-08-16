@@ -4,6 +4,30 @@
 
     
   <url>
+    <loc>http://fuping.site/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/</loc>
+    <lastmod>2017-08-16T08:50:55.860Z</lastmod>
+    <data>
+        <display>
+        <title>使用PentestBox工具利用ETERNALBLUE对Win7进行攻击，获取Meterpreter反弹</title>
+        <pubTime>2017-08-16T06:54:20.000Z</pubTime>
+        
+        <tag>MS17-010</tag>
+         
+        <tag>PentestBox</tag>
+         
+        <tag>Metasploit</tag>
+         
+         
+           
+             
+              <breadCrumb title="Exploit" url="http://fuping.site/categories/Exploit/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://fuping.site/2017/07/19/SQLite-Injection-Get-WebShell/</loc>
     <lastmod>2017-07-26T02:00:30.932Z</lastmod>
     <data>
@@ -125,9 +149,9 @@
         
         <tag>MS17-010</tag>
          
-        <tag>Ngrok</tag>
-         
         <tag>Metasploit</tag>
+         
+        <tag>Ngrok</tag>
          
          
            
