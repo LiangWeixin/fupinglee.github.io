@@ -427,10 +427,12 @@ header {
     height: 60px; }
   header .nav-list-item {
     display: inline-block;
-    padding: 19px  10px; }
+    padding: 19px 10px; }
     header .nav-list-item a {
       font-size: 16px;
       line-height: 1.4; }
+  header ul.nav-fix-list-child {
+    display: none; }
 
 .home.post-list {
   margin: 2em 0; }
@@ -447,10 +449,10 @@ header {
     color: #42b983; }
 
 .archive {
-  max-width: 500px;
+  max-width: 700px;
   margin: 5em auto; }
   .archive .post-item {
-    padding: 2px 0 0 50px; }
+    padding: 2px 0 0 30px; }
   .archive .post-time,
   .archive .post-title-link {
     font-size: 1rem; }
@@ -487,6 +489,11 @@ header {
     font-size: 12px;
     color: white;
     background-color: #E36B6B; }
+  .post-block .post-info a.post-category {
+    margin-left: 10px; }
+
+.post-block .post-tags a {
+  margin-left: 10px; }
 
 .post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6 {
   position: relative;
@@ -758,14 +765,14 @@ pre {
 main.container {
   margin: 2em 10px; }
 
-@media screen and (min-width: 700px) {
+@media screen and (min-width: 800px) {
   .wrap {
-    width: 700px;
+    width: 800px;
     margin: 0 auto; }
   header {
     padding: 20px 100px; } }
 
-@media screen and (max-width: 700px) {
+@media screen and (max-width: 800px) {
   .wrap {
     width: 100%; }
   header {
@@ -803,8 +810,15 @@ footer {
     footer .copyright a:hover {
       color: #888; }
 
+.nav-category-list-child li.nav-category-list-item {
+  display: inline;
+  margin-right: 10px; }
+
 @font-face {
   font-family: 'sourcesanspro';
   src: url("../font/sourcesanspro.woff2") format("woff2"), url("../font/sourcesanspro.woff") format("woff");
   font-weight: normal;
   font-style: normal; }
+
+.datatable {
+  padding-top: 10px; }
