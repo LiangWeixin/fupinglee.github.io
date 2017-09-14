@@ -21,10 +21,10 @@
 <h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>参考<a href="https://github.com/vysec/CVE-2017-8759" target="_blank" rel="external">https://github.com/vysec/CVE-2017-8759</a><br>新建o.png，内容为：</p>
 <p><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/o.png内容.jpg" alt="o.png内容"></p>
 <p>word.db内容：<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/word.db内容.jpg" alt="word.db内容"></p>
-<p>新建一个rtf文档，用记事本打开，将<code>\object\objautlink\rsltpict</code>修改为<code>\object\objautlink\objupdate\rsltpict</code><br>打开blob.bin文件</p>
+<p>新建一个rtf文档，随意插入一个对象。例如<a href="http://192.168.135.135/office/o.png" target="_blank" rel="external">http://192.168.135.135/office/o.png</a> (这是为了下面替换objdata内容)<br>用记事本打开，将<code>\object\objautlink\rsltpict</code>修改为<code>\object\objautlink\objupdate\rsltpict</code><br>打开blob.bin文件</p>
 <p><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/blob.bin源文件.jpg" alt="blob.bin源文件"><br>将其中的地址修改为<a href="http://192.168.135.135/office/o.png" target="_blank" rel="external">http://192.168.135.135/office/o.png</a><br>复制原来的地址，尽量多复制点空格。<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/替换过程1.jpg" alt="替换过程1"></p>
 <p>然后生成新的hex地址<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/生成新的地址.jpg" alt="生成新的地址"></p>
-<p>然后用生成的地址替换blob.bin中的地址<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/替换后的blob.bin文件.jpg" alt="替换后的blob.bin文件"><br>然后将blob.bin中的内容替换word文档的source<br>然后打开word文档，就会有神奇的事情发生。<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/执行效果2.gif" alt="执行效果2"></p>
+<p>然后用生成的地址替换blob.bin中的地址<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/替换后的blob.bin文件.jpg" alt="替换后的blob.bin文件"><br>然后将blob.bin中的内容替换word文档的objdata内容。<br>然后打开word文档，就会有神奇的事情发生。<br><img src="/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/执行效果2.gif" alt="执行效果2"></p>
 <p>恶意软件将被放置在<code>C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\OfficeUpdte-KB[6个随机数字].exe</code></p>
 <blockquote>
 <p>以上均在虚拟机上测试。没有使用样本中的left.jpg。最后结果确实如火眼所说的那样生成了OfficeUpdte-KB******.exe文件。在win10(真机)上测试的时候还生成了http1001924168413541350office0office4png.pdb、http1001924168413541350office0office4png.dll和Logo.cs三个文件。<br>这里方法一没有直接执行的原因我也不太清楚，但是用方法二插入office.png，也是不会直接执行的。如果方法一和二中过程替换一下，效果也是一样的。</p>
