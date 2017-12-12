@@ -3,6 +3,28 @@
 
 
     
+  <url>
+    <loc>https://fuping.site/2017/12/11/NEW-CVE-Monitor/</loc>
+    <lastmod>2017-12-11T07:47:55.227Z</lastmod>
+    <data>
+        <display>
+        <title>NEW CVE Monitor</title>
+        <pubTime>2017-12-11T07:44:05.000Z</pubTime>
+        
+        <tag>CVE-Monitor</tag>
+         
+        <tag>Mongodb数据库</tag>
+         
+         
+           
+             
+              <breadCrumb title="编程之美" url="https://fuping.site/categories/%E7%BC%96%E7%A8%8B%E4%B9%8B%E7%BE%8E/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
     
   <url>
     <loc>https://fuping.site/2017/09/14/CVE-2017-8759-Remote-Code-Execution-Vulnerability-Replication/</loc>
@@ -38,9 +60,9 @@
         
         <tag>MS17-010</tag>
          
-        <tag>PentestBox</tag>
-         
         <tag>Metasploit</tag>
+         
+        <tag>PentestBox</tag>
          
          
            
@@ -172,9 +194,9 @@
         
         <tag>MS17-010</tag>
          
-        <tag>Metasploit</tag>
-         
         <tag>Ngrok</tag>
+         
+        <tag>Metasploit</tag>
          
          
            
