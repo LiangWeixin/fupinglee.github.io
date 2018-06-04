@@ -4,6 +4,26 @@
 
     
   <url>
+    <loc>https://fuping.site/2018/06/04/upload-labs-writeup/</loc>
+    <lastmod>2018-06-04T15:19:46.074Z</lastmod>
+    <data>
+        <display>
+        <title>upload-labs writeup</title>
+        <pubTime>2018-06-04T02:25:58.000Z</pubTime>
+        
+        <tag>PHP</tag>
+         
+         
+           
+             
+              <breadCrumb title="Exploit" url="https://fuping.site/categories/Exploit/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>https://fuping.site/2018/05/25/UEditor-SSRF-In-JSP/</loc>
     <lastmod>2018-05-25T03:16:02.291Z</lastmod>
     <data>
